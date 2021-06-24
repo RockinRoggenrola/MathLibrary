@@ -17,6 +17,15 @@ CharacterTypes.set('*', 'o');
 CharacterTypes.set('/', 'o');
 CharacterTypes.set('^', 'o');
 
+CharacterTypes.set('pi', 'c');
+CharacterTypes.set('e', 'c');
+
 CharacterTypes.set('.', 'd');
 
-module.exports = CharacterTypes;
+let longestCharLen = 0;
+const keyIterator = CharacterTypes.keys();
+for (key of keyIterator) {
+    if (key.length > longestCharLen) longestCharLen = key.length;
+}
+
+module.exports = { CharacterTypes, longestCharLen };

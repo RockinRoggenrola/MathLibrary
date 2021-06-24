@@ -1,7 +1,7 @@
 const InvalidExpression = require('./Invalid Expression Class');
 const Expression = require('./Expression Class');
 const stateSequenceMap = require('./State Sequence Map');
-const CharacterTypes = require('./Character Types');
+const { CharacterTypes, longestCharLen } = require('./Character Types');
 
 function parse(exprString) {
     const exprArray = exprString.split("");
@@ -13,16 +13,22 @@ function parse(exprString) {
         exponents: [],
         isDecimal: 0,
         character: '',
+        charLen: 0,
         lastCharacter: '',
         strIndex: 0
     };
 
-    let { character, strIndex } = currentExpression;
+    let { character, strIndex, charLen } = currentExpression;
 
-    for (; strIndex < exprArray.length; strIndex++) {
+    for (; strIndex < exprArray.length; strIndex += charLen) {
         currentExpression.lastCharacter = character;
 
-        character = exprArray[strIndex];
+        for (i = longestCharLen; i > 0; i--) {
+            const possibleCharacter = exprArray.slice(strIndex, strIndex + i);
+            if (CharacterTypes.has(possibleCharacter)) character = possibleCharacter; break;
+            if (possibleCharacter.length = 1) character = possibleCharacter;
+        }
+
         const nextState = CharacterTypes.get(character) || 'u';
 
         if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}`, currentExpression.strIndex + 1);
@@ -30,7 +36,7 @@ function parse(exprString) {
         const stateSequence = stateSequenceMap.get(currentState + nextState);
         const onFunction = stateSequence.onFunction;
 
-        [currentExpression.character, currentExpression.strIndex] = [character, strIndex];
+        [currentExpression.character, currentExpression.strIndex, currentExpression.charLen] = [character, strIndex, charLen];
 
         currentExpression = onFunction(currentExpression);
 
@@ -39,7 +45,8 @@ function parse(exprString) {
         currentState = nextState;
     }
     
-    if (CharacterTypes.get(currentExpression.character) != 'n') return 
+    const lastChacterType =  CharacterTypes.get(currentExpression.character);
+    if (lastChacterType != 'n' && lastChacterType != 'c') return 
     new InvalidExpression(`Can't end an expression with a ${character}.`, strIndex);
 
     let { numbers, addSub, multDiv, exponents } = currentExpression;
@@ -48,7 +55,7 @@ function parse(exprString) {
 } 
 
 function compute(exprString) {
-    let expression = parse(exprString);
+    const expression = parse(exprString);
     if (Object.getPrototypeOf(expression).constructor == InvalidExpression) return expression.fullMessage;
     return `${exprString} = ${expression.evaluate()}`;
 }
