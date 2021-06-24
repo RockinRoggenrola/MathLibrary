@@ -12,6 +12,7 @@ NumberSymbolMap.set('8', 8);
 NumberSymbolMap.set('9', 9);
 
 NumberSymbolMap.set('pi', Math.PI);
+NumberSymbolMap.set('π', Math.PI);
 NumberSymbolMap.set('e', Math.E);
 
 module.exports = NumberSymbolMap;

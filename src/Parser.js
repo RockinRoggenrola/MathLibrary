@@ -23,11 +23,15 @@ function parse(exprString) {
     for (; strIndex < exprArray.length; strIndex += charLen) {
         currentExpression.lastCharacter = character;
 
-        for (i = longestCharLen; i > 0; i--) {
-            const possibleCharacter = exprArray.slice(strIndex, strIndex + i);
-            if (CharacterTypes.has(possibleCharacter)) character = possibleCharacter; break;
-            if (possibleCharacter.length = 1) character = possibleCharacter;
+        for (let i = longestCharLen; i > 0; i--) {
+            const possibleCharacter = exprArray.slice(strIndex, strIndex + i).join("");
+            if (CharacterTypes.has(possibleCharacter)) {
+                character = possibleCharacter; 
+                break;
+            }
+            if (i == 1) character = possibleCharacter;
         }
+        charLen = character.length;
 
         const nextState = CharacterTypes.get(character) || 'u';
 

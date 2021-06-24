@@ -18,6 +18,7 @@ CharacterTypes.set('/', 'o');
 CharacterTypes.set('^', 'o');
 
 CharacterTypes.set('pi', 'c');
+CharacterTypes.set('π', 'c');
 CharacterTypes.set('e', 'c');
 
 CharacterTypes.set('.', 'd');
