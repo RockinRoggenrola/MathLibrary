@@ -1,13 +1,11 @@
 const StateSequence = require('../State Sequence Class');
+const { Operation, OperationFunctionMap } = require('../Operation Class');
 
 let onFunction = function(currentExpression) {
-    const { Operation, OperationFunctionMap } = require('../Operation Class');
     const operatorSymbol = currentExpression.character;
-    const numbersLen = currentExpression.numbers.length;
-
     const operation = new Operation(
         OperationFunctionMap.get(operatorSymbol),
-        numbersLen - 1, 2
+        currentExpression.numbersLen() - 1, 2
     );
 
     if (operatorSymbol == '^') {
@@ -19,6 +17,6 @@ let onFunction = function(currentExpression) {
     }
 
     return currentExpression;
-}
+};
 
 module.exports = new StateSequence('c', 'o', onFunction);

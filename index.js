@@ -3,6 +3,6 @@ let math = {
     ComplexNumber: require('./Complex Number Class')
 };
 
-console.log(math.compute('π'));
+console.log(math.compute('3-5'));
 
 module.exports = math;

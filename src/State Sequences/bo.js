@@ -11,13 +11,12 @@ let onFunction = function(currentExpression) {
     else if (operatorSymbol == '+') return currentExpression;
     
     currentExpression.numbers.push(-1);
-
     const operation = new Operation(
         OperationFunctionMap.get('*'), 0, 2
     );
-
     currentExpression.multDiv.push(operation);
 
     return currentExpression;
-}
+};
+
 module.exports = new StateSequence('b', 'o', onFunction);

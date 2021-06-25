@@ -4,7 +4,6 @@ const stateSequenceMap = require('./State Sequence Map');
 const { CharacterTypes, longestCharLen } = require('./Character Types');
 
 function parse(exprString) {
-    const exprArray = exprString.split("");
     let currentState = 'b';
     let currentExpression = {
         numbers: [],
@@ -15,10 +14,14 @@ function parse(exprString) {
         character: '',
         charLen: 0,
         lastCharacter: '',
-        strIndex: 0
+        strIndex: 0,
+        exprArray: exprString.split(""),
+        numbersLen() {
+            return this.numbers.length;
+        }
     };
 
-    let { character, strIndex, charLen } = currentExpression;
+    let { character, strIndex, charLen, exprArray } = currentExpression;
 
     for (; strIndex < exprArray.length; strIndex += charLen) {
         currentExpression.lastCharacter = character;
