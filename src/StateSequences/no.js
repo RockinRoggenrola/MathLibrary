@@ -1,22 +1,15 @@
-const ComplexNumber = require('../../ComplexNumberClass');
 const StateSequence = require('../Classes/StateSequenceClass');
 const Operation = require('../Classes/OperationClass');
 
-let onFunction = function(currentExpression) {
-    currentExpression.numbers[currentExpression.numbersLen() - 1] = new ComplexNumber(currentExpression.lastNumber(), 0);
+let onFunction = function() {
+    this.makeLastNumComplex();
 
-    const operatorSymbol = currentExpression.character;
-    const operation = new Operation(operatorSymbol, currentExpression.numbersLen() - 1, 2);
+    const operatorSymbol = this.character;
+    const operation = new Operation(operatorSymbol, this.numbersLen - 1, 2);
 
-    if (operatorSymbol == '^') {
-        currentExpression.exponents.unshift(operation);
-    } else if (operatorSymbol == '*' || operatorSymbol == '/') {
-        currentExpression.multDiv.push(operation);
-    } else if (operatorSymbol == '+' || operatorSymbol == '-') {
-        currentExpression.addSub.push(operation);
-    }
-    
-    return currentExpression;
+    if (operatorSymbol == '^') this.exponents.unshift(operation); 
+    else if (operatorSymbol == '*' || operatorSymbol == '/') this.multDiv.push(operation); 
+    else if (operatorSymbol == '+' || operatorSymbol == '-') this.addSub.push(operation);
 };
 
 module.exports = new StateSequence('n', 'o', onFunction);

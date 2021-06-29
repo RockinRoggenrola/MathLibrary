@@ -1,19 +1,16 @@
 const StateSequence = require('../Classes/StateSequenceClass');
 const Operation = require('../Classes/OperationClass');
 const NumberSymbolMap = require('../NumberSymbolMap');
-const ComplexNumber = require('../../ComplexNumberClass');
 
-let onFunction = function(currentExpression) {
-    currentExpression.numbers[currentExpression.numbersLen() - 1] = new ComplexNumber(currentExpression.lastNumber(), 0);
+let onFunction = function() {
+    this.makeLastNumComplex();
 
-    const operation = new Operation('*', currentExpression.numbersLen() - 1, 2);
-    const number = NumberSymbolMap.get(currentExpression.character);
+    const operation = new Operation('*', this.numbersLen - 1, 2);
+    const number = NumberSymbolMap.get(this.character);
 
-    currentExpression.numbers.push(number);
-    currentExpression.multDiv.push(operation);
-    currentExpression.isDecimal = 0;
-
-    return currentExpression;
+    this.numbers.push(number);
+    this.multDiv.push(operation);
+    this.isDecimal = 0;
 };
 
 module.exports = new StateSequence('n', 'c', onFunction);

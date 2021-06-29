@@ -1,33 +1,16 @@
 const InvalidExpression = require('./Classes/InvalidExpressionClass');
 const Expression = require('./Classes/ExpressionClass');
-const stateSequenceMap = require('./StateSequenceMap');
 const { CharacterTypes, longestCharLen } = require('./CharacterTypes');
+const UnsortedExpression = require('./Classes/UnsortedExpressionClass');
 
 function parse(exprString) {
     let currentState = 'b';
-    let currentExpression = {
-        numbers: [],
-        addSub: [],
-        multDiv: [],
-        exponents: [],
-        isDecimal: 0,
-        character: '',
-        charLen: 0,
-        lastCharacter: '',
-        strIndex: 0,
-        exprArray: exprString.trim().split(/ +/).join().split(''),
-        numbersLen() {
-            return this.numbers.length;
-        },
-        lastNumber() {
-            return this.numbers[this.numbersLen() - 1];
-        }
-    };
-
-    let { character, strIndex, charLen, exprArray } = currentExpression;
+    let currentExpr = new UnsortedExpression(exprString);
+    let { character, strIndex, charLen, exprArray } = currentExpr;
 
     for (; strIndex < exprArray.length; strIndex += charLen) {
-        currentExpression.lastCharacter = character;
+        currentExpr.lastCharacter = character;
+
 
         for (let i = longestCharLen; i > 0; i--) {
             const possibleCharacter = exprArray.slice(strIndex, strIndex + i).join("");
@@ -39,30 +22,32 @@ function parse(exprString) {
         }
         charLen = character.length;
 
+
         const nextState = CharacterTypes.get(character) || 'u';
-
         if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
+        currentExpr.update(character, strIndex, charLen);
+        
 
-        const stateSequence = stateSequenceMap.get(currentState + nextState);
-        const onFunction = stateSequence.onFunction;
+        const stateSequence = currentState + nextState;
+        try { 
+            if (Object.getPrototypeOf(currentExpr[stateSequence]()).constructor == InvalidExpression) 
+            return currentExpr[currentState + nextState]();
+        } catch(err) {}
 
-        [currentExpression.character, currentExpression.strIndex, currentExpression.charLen] = [character, strIndex, charLen];
-
-        currentExpression = onFunction(currentExpression);
-
-        if (Object.getPrototypeOf(currentExpression).constructor == InvalidExpression) return currentExpression;
-
+        
+        if (currentExpr.isIndexAtEndOfExpr) currentExpr.makeLastNumComplex();
         currentState = nextState;
     }
     
-    const lastChacterType =  CharacterTypes.get(currentExpression.character);
-    if (lastChacterType != 'n' && lastChacterType != 'c') return
+    const lastChacterType =  CharacterTypes.get(currentExpr.character);
+    if (lastChacterType != 'n' && lastChacterType != 'c') return // to next line ->
     new InvalidExpression(`Can't end an expression with a ${character}.`, strIndex);
 
-    let { numbers, addSub, multDiv, exponents } = currentExpression;
+    let { numbers, addSub, multDiv, exponents } = currentExpr;
     let operations = [...exponents, ...multDiv, ...addSub];
     return new Expression(numbers, operations);
 } 
+
 
 function compute(exprString) {
     const expression = parse(exprString);

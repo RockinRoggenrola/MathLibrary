@@ -1,8 +1,7 @@
 const StateSequence = require('../Classes/StateSequenceClass');
 
-let onFunction = function(currentExpression) {
-    currentExpression.isDecimal = 1;
-    return currentExpression;
+let onFunction = function() {
+    this.isDecimal = 1;
 };
 
 module.exports = new StateSequence('n', 'd', onFunction);
