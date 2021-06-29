@@ -22,6 +22,7 @@ CharacterTypes.set('π', 'c');
 CharacterTypes.set('tau', 'c');
 CharacterTypes.set('τ', 'c');
 CharacterTypes.set('e', 'c');
+CharacterTypes.set('i', 'c');
 
 CharacterTypes.set('.', 'd');
 

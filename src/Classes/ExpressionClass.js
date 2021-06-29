@@ -4,7 +4,7 @@ class Expression {
         this.operations = operations;
     }
     evaluate() {
-        if (this.numbers.length == 1) return this.numbers[0];
+        if (this.numbers.length == 1) return this.numbers[0].fixPrecision();
         
         const operation = this.operations[0];
         const operationInputs = operation.indicies.map(value => this.numbers[value]);

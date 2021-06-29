@@ -1,12 +1,12 @@
-const StateSequence = require('../State Sequence Class');
-const { Operation, OperationFunctionMap } = require('../Operation Class');
+const ComplexNumber = require('../../ComplexNumberClass');
+const StateSequence = require('../Classes/StateSequenceClass');
+const Operation = require('../Classes/OperationClass');
 
 let onFunction = function(currentExpression) {
+    currentExpression.numbers[currentExpression.numbersLen() - 1] = new ComplexNumber(currentExpression.lastNumber(), 0);
+
     const operatorSymbol = currentExpression.character;
-    const operation = new Operation(
-        OperationFunctionMap.get(operatorSymbol),
-        currentExpression.numbersLen() - 1, 2
-    );
+    const operation = new Operation(operatorSymbol, currentExpression.numbersLen() - 1, 2);
 
     if (operatorSymbol == '^') {
         currentExpression.exponents.unshift(operation);

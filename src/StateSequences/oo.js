@@ -1,6 +1,6 @@
-const StateSequence = require('../State Sequence Class');
-const { Operation, OperationFunctionMap } = require('../Operation Class');
-const InvalidExpression = require('../Invalid Expression Class');
+const StateSequence = require('../Classes/StateSequenceClass');
+const Operation = require('../Classes/OperationClass');
+const InvalidExpression = require('../Classes/InvalidExpressionClass');
 
 let onFunction = function(currentExpression) {
     if (currentExpression.character == '*' && 
@@ -12,10 +12,7 @@ let onFunction = function(currentExpression) {
     if (currentExpression.character == '*' && 
     currentExpression.lastCharacter ==  '*') {
         currentExpression.multDiv.pop();
-        const operation = new Operation(
-            OperationFunctionMap.get('^'),
-            currentExpression.numbersLen() - 1, 2
-        )
+        const operation = new Operation('^', currentExpression.numbersLen() - 1, 2);
 
         currentExpression.exponents.unshift(operation);
         return currentExpression;

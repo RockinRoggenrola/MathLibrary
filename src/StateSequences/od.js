@@ -1,4 +1,4 @@
-const StateSequence = require('../State Sequence Class');
+const StateSequence = require('../Classes/StateSequenceClass');
 
 let onFunction = function(currentExpression) {
     currentExpression.numbers.push(0);

@@ -1,5 +1,5 @@
-const StateSequence = require('../State Sequence Class');
-const NumberSymbolMap = require('../Number Symbol Map');
+const StateSequence = require('../Classes/StateSequenceClass');
+const NumberSymbolMap = require('../NumberSymbolMap');
 
 let onFunction = function(currentExpression) {
     const number = NumberSymbolMap.get(currentExpression.character);    

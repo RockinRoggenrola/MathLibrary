@@ -1,8 +1,8 @@
 let math = {
     compute: require('./src/Parser').compute,
-    ComplexNumber: require('./Complex Number Class')
+    ComplexNumber: require('./ComplexNumberClass')
 };
 
-console.log(math.compute('3-5'));
+console.log(math.compute('5-2/4'));
 
 module.exports = math;

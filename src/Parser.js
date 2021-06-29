@@ -1,7 +1,7 @@
-const InvalidExpression = require('./Invalid Expression Class');
-const Expression = require('./Expression Class');
-const stateSequenceMap = require('./State Sequence Map');
-const { CharacterTypes, longestCharLen } = require('./Character Types');
+const InvalidExpression = require('./Classes/InvalidExpressionClass');
+const Expression = require('./Classes/ExpressionClass');
+const stateSequenceMap = require('./StateSequenceMap');
+const { CharacterTypes, longestCharLen } = require('./CharacterTypes');
 
 function parse(exprString) {
     let currentState = 'b';
@@ -15,9 +15,12 @@ function parse(exprString) {
         charLen: 0,
         lastCharacter: '',
         strIndex: 0,
-        exprArray: exprString.split(""),
+        exprArray: exprString.trim().split(/ +/).join().split(''),
         numbersLen() {
             return this.numbers.length;
+        },
+        lastNumber() {
+            return this.numbers[this.numbersLen() - 1];
         }
     };
 
@@ -38,7 +41,7 @@ function parse(exprString) {
 
         const nextState = CharacterTypes.get(character) || 'u';
 
-        if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}`, currentExpression.strIndex + 1);
+        if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
 
         const stateSequence = stateSequenceMap.get(currentState + nextState);
         const onFunction = stateSequence.onFunction;
@@ -53,7 +56,7 @@ function parse(exprString) {
     }
     
     const lastChacterType =  CharacterTypes.get(currentExpression.character);
-    if (lastChacterType != 'n' && lastChacterType != 'c') return 
+    if (lastChacterType != 'n' && lastChacterType != 'c') return
     new InvalidExpression(`Can't end an expression with a ${character}.`, strIndex);
 
     let { numbers, addSub, multDiv, exponents } = currentExpression;
@@ -64,7 +67,7 @@ function parse(exprString) {
 function compute(exprString) {
     const expression = parse(exprString);
     if (Object.getPrototypeOf(expression).constructor == InvalidExpression) return expression.fullMessage;
-    return `${exprString} = ${expression.evaluate()}`;
+    return `${exprString.trim().split(/ +/).join('')} = ${expression.evaluate().toString()}`;
 }
 
 module.exports = { parse, compute };
