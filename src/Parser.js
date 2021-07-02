@@ -27,24 +27,25 @@ function parse(exprString) {
         if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
         currentExpr.update(character, strIndex, charLen);
         
+        if (currentState == 'n' && nextState != 'n' && nextState != 'd') currentExpr.makeLastNumComplex();
 
         const stateSequence = currentState + nextState;
         try { 
             if (Object.getPrototypeOf(currentExpr[stateSequence]()).constructor == InvalidExpression) 
-            return currentExpr[currentState + nextState]();
+            return currentExpr[stateSequence]();
         } catch(err) {}
 
         
-        if (currentExpr.isIndexAtEndOfExpr) currentExpr.makeLastNumComplex();
+        if (currentExpr.isIndexAtEndOfExpr && nextState == 'n') currentExpr.makeLastNumComplex();
         currentState = nextState;
     }
     
     const lastChacterType =  CharacterTypes.get(currentExpr.character);
-    if (lastChacterType != 'n' && lastChacterType != 'c') return // to next line ->
+    if (lastChacterType != 'n' && lastChacterType != 'c' && lastChacterType != 'r') return // to next line ->
     new InvalidExpression(`Can't end an expression with a ${character}.`, strIndex);
 
-    let { numbers, addSub, multDiv, exponents } = currentExpr;
-    let operations = [...exponents, ...multDiv, ...addSub];
+    const operations = currentExpr.operations.reduce((total, value) => value.merge().concat(total), []);
+    const numbers = currentExpr.numbers;
     return new Expression(numbers, operations);
 } 
 

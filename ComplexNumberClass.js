@@ -61,15 +61,18 @@ class ComplexNumber {
     }
 
     static multiply(num1, num2) {
-        const magnitude = num1.magnitude * num2.magnitude;
-        const angle = num1.angle + num2.angle;
-        return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+        return new ComplexNumber(
+            num1.real*num2.real - num1.imaginary*num2.imaginary,
+            num1.real*num2.imaginary + num1.imaginary*num2.real
+        )
     }
 
     static divide(num1, num2) {
-        const magnitude = num1.magnitude / num2.magnitude;
-        const angle = num1.angle - num2.angle;
-        return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+        const denominator = num2.real**2 + num2.imaginary**2;
+        return new ComplexNumber(
+            (num1.real*num2.real + num1.imaginary*num2.imaginary) / denominator,
+            (num1.imaginary*num1.real - num1.real*num2.imaginary) /denominator
+        )
     }
 
     static exponentiate(num1, num2) {

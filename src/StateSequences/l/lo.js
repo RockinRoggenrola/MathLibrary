@@ -1,0 +1,16 @@
+const StateSequence = require('../../Classes/StateSequenceClass');
+const InvalidExpression = require('../../Classes/InvalidExpressionClass');
+const ComplexNumber = require('../../../ComplexNumberClass');
+
+const onFunction = function() {
+    const operatorSymbol = this.character;
+
+    if (operatorSymbol != '+' && operatorSymbol != '-') return //to next line ->
+    new InvalidExpression(`Can't have a ${operatorSymbol} after an opening parenthesis.`, this.strIndex + 1);
+    if (operatorSymbol == '+') return;
+    
+    this.numbers.push(new ComplexNumber(-1, 0));
+    this.insertOperation('*');
+};
+
+module.exports = new StateSequence('l', 'o', onFunction);

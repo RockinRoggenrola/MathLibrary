@@ -7,5 +7,6 @@ OperatorFunctionMap.set('*', array => array.reduce((total, value) => ComplexNumb
 OperatorFunctionMap.set('/', array => array.reduce((total, value) => ComplexNumber.divide(total, value)));
 
 OperatorFunctionMap.set('^', array => array.reduceRight((total, value) => ComplexNumber.exponentiate(value, total)));
+OperatorFunctionMap.set('**', array => array.reduceRight((total, value) => ComplexNumber.exponentiate(value, total)));
 
 module.exports = OperatorFunctionMap;
