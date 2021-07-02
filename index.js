@@ -4,6 +4,6 @@ let math = {
     Expression: require('./src/Classes/ExpressionClass')
 };
 
-console.log(math.compute('1i'));
+console.log(math.compute(''));
 
 module.exports = math;

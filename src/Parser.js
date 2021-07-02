@@ -1,30 +1,32 @@
 const InvalidExpression = require('./Classes/InvalidExpressionClass');
 const Expression = require('./Classes/ExpressionClass');
-const { CharacterTypes, longestCharLen } = require('./CharacterTypes');
-const UnsortedExpression = require('./Classes/UnsortedExpressionClass');
+const { CharacterTypes, longestCharLen, validEndingTypes } = require('./CharacterTypes');
+const UnorganizedExpression = require('./Classes/UnorganizedExpressionClass');
 
-function parse(exprString) {
+
+const findCharacter = (exprArray, index) => {
+    for (let i = longestCharLen; i > 0; i--) {
+        const possibleCharacter = exprArray.slice(index, index + i).join("");
+        if (CharacterTypes.has(possibleCharacter)) {
+            return possibleCharacter;
+        }
+        if (i == 1) return possibleCharacter;
+    }
+}
+
+const parse = exprString => {
     let currentState = 'b';
-    let currentExpr = new UnsortedExpression(exprString);
+    let currentExpr = new UnorganizedExpression(exprString);
     let { character, strIndex, charLen, exprArray } = currentExpr;
 
     for (; strIndex < exprArray.length; strIndex += charLen) {
+
         currentExpr.lastCharacter = character;
-
-
-        for (let i = longestCharLen; i > 0; i--) {
-            const possibleCharacter = exprArray.slice(strIndex, strIndex + i).join("");
-            if (CharacterTypes.has(possibleCharacter)) {
-                character = possibleCharacter; 
-                break;
-            }
-            if (i == 1) character = possibleCharacter;
-        }
+        character = findCharacter(exprArray, strIndex)
         charLen = character.length;
 
-
-        const nextState = CharacterTypes.get(character) || 'u';
-        if (nextState == 'u') return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
+        const nextState = CharacterTypes.get(character);
+        if (!nextState) return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
         currentExpr.update(character, strIndex, charLen);
         
         if (currentState == 'n' && nextState != 'n' && nextState != 'd') currentExpr.makeLastNumComplex();
@@ -39,15 +41,14 @@ function parse(exprString) {
         if (currentExpr.isIndexAtEndOfExpr && nextState == 'n') currentExpr.makeLastNumComplex();
         currentState = nextState;
     }
-    
-    const lastChacterType =  CharacterTypes.get(currentExpr.character);
-    if (lastChacterType != 'n' && lastChacterType != 'c' && lastChacterType != 'r') return // to next line ->
-    new InvalidExpression(`Can't end an expression with a ${character}.`, strIndex);
+
+    if (!validEndingTypes.has(CharacterTypes.get(character))) return new InvalidExpression(
+        `Can't end an expression with a ${character}.`, undefined);
 
     const operations = currentExpr.operations.reduce((total, value) => value.merge().concat(total), []);
     const numbers = currentExpr.numbers;
     return new Expression(numbers, operations);
-} 
+}
 
 
 function compute(exprString) {

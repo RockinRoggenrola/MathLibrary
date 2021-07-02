@@ -1,29 +1,13 @@
+const NumberSymbolMap = require("./NumberSymbolMap");
+const OperatorFunctionMap = require("./OperatorFunctionMap");
 const CharacterTypes = new Map();
 
-CharacterTypes.set('0', 'n');
-CharacterTypes.set('1', 'n');
-CharacterTypes.set('2', 'n');
-CharacterTypes.set('3', 'n');
-CharacterTypes.set('4', 'n');
-CharacterTypes.set('5', 'n');
-CharacterTypes.set('6', 'n');
-CharacterTypes.set('7', 'n');
-CharacterTypes.set('8', 'n');
-CharacterTypes.set('9', 'n');
+OperatorFunctionMap.forEach((value, key) => CharacterTypes.set(key, 'o'));
 
-CharacterTypes.set('+', 'o');
-CharacterTypes.set('-', 'o');
-CharacterTypes.set('*', 'o');
-CharacterTypes.set('/', 'o');
-CharacterTypes.set('^', 'o');
-CharacterTypes.set('**', 'o');
-
-CharacterTypes.set('pi', 'c');
-CharacterTypes.set('π', 'c');
-CharacterTypes.set('tau', 'c');
-CharacterTypes.set('τ', 'c');
-CharacterTypes.set('e', 'c');
-CharacterTypes.set('i', 'c');
+NumberSymbolMap.forEach((value, key) => {
+    if (typeof(value) == 'number') CharacterTypes.set(key, 'n');
+    if (typeof(value) == 'object') CharacterTypes.set(key, 'c');
+})
 
 CharacterTypes.set('(', 'l');
 CharacterTypes.set(')', 'r');
@@ -36,4 +20,6 @@ for (key of keyIterator) {
     if (key.length > longestCharLen) longestCharLen = key.length;
 }
 
-module.exports = { CharacterTypes, longestCharLen };
+const validEndingTypes = new Set(['n', 'c', 'r']);
+
+module.exports = { CharacterTypes, longestCharLen, validEndingTypes };

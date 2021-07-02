@@ -2,7 +2,7 @@ const fs = require('fs');
 const process = require('process');
 const ComplexNumber = require('../../ComplexNumberClass');
 const NumberSymbolMap = require('../NumberSymbolMap');
-const Operation = require('../Classes/OperationClass');
+const Operation = require('./OperationClass');
 const OperationArray = require('./OperationArrayClass');
 
 class UnsortedExpression {
