@@ -96,6 +96,34 @@ class ComplexNumber {
         })
     }
 
+    static square(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const two = new ComplexNumber(2, 0);
+        return ComplexNumber.exponentiate([number, two]);
+    }
+    
+    static cube(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const three = new ComplexNumber(3, 0);
+        return ComplexNumber.exponentiate([number, three]);
+    }
+
+    static sqrt(arrayOfNums) {
+        const oneHalf = new ComplexNumber(1/2, 0);
+        return ComplexNumber.exponentiate([arrayOfNums[0], oneHalf]);
+    }
+
+    static cbrt(arrayOfNums) {
+        const oneThird = new ComplexNumber(1/3, 0);
+        return ComplexNumber.exponentiate([arrayOfNums[0], oneThird]);
+    }
+
+    static recripocate(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const one = new ComplexNumber(1, 0);
+        return ComplexNumber.divide([one, number]);
+    }
+
     static exp(arrayOfNums) {
         const EulersNum = new ComplexNumber(Math.E, 0);
         return ComplexNumber.exponentiate([EulersNum, arrayOfNums[0]]);
@@ -106,6 +134,117 @@ class ComplexNumber {
         return new ComplexNumber(
             Math.log(number.magnitude), number.angle
         );
+    }
+
+    static sin(arrayOfNums) {
+        const number = arrayOfNums[0];
+        return new ComplexNumber(
+            Math.sin(number.real)*Math.cosh(number.imaginary),
+            Math.sinh(number.imaginary)*Math.cos(number.real)
+        );
+    }
+    
+    static cos(arrayOfNums) {
+        const number = arrayOfNums[0];
+        return new ComplexNumber(
+            Math.cos(number.real)*Math.cosh(number.imaginary),
+            -1*Math.sinh(number.imaginary)*Math.sin(number.real)
+        );
+    }
+
+    static tan(arrayOfNums) {
+        return ComplexNumber.divide([
+            ComplexNumber.sin(arrayOfNums),
+            ComplexNumber.cos(arrayOfNums)    
+        ]);
+    }
+
+    static sec(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.cos(arrayOfNums)
+        ]);
+    }
+    
+    static csc(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.sin(arrayOfNums)
+        ]);
+    }
+    
+    static cot(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.tan(arrayOfNums)
+        ]);
+    }
+    
+    static sinh(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const imaginaryUnit = new ComplexNumber(0, 1);
+        return ComplexNumber.multiply([
+            imaginaryUnit,
+            ComplexNumber.sin([
+                new ComplexNumber(number.imaginary, -1*number.real)
+            ])
+        ]);
+    }
+
+    static cosh(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const imaginaryUnit = new ComplexNumber(0, 1);
+        return ComplexNumber.cos([
+            ComplexNumber.multiply([
+                imaginaryUnit, number
+            ])
+        ]);
+    }
+    
+    static tanh(arrayOfNums) {
+        return ComplexNumber.divide([
+            ComplexNumber.sinh(arrayOfNums),
+            ComplexNumber.cosh(arrayOfNums)
+        ]);
+    }
+    
+    static sech(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.cosh(arrayOfNums)
+        ]);
+    }
+    
+    static csch(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.sinh(arrayOfNums)
+        ]);
+    }
+    
+    static coth(arrayOfNums) {
+        return ComplexNumber.recripocate([
+            ComplexNumber.tanh(arrayOfNums)
+        ]);
+    }
+
+    static asin(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const imaginaryUnit = new ComplexNumber(0, 1);
+        const one = new ComplexNumber(1, 0);
+        const negativeOne = new ComplexNumber(-1, 0);
+        return ComplexNumber.multiply([
+            negativeOne,
+            imaginaryUnit,
+            ComplexNumber.ln([
+                ComplexNumber.add([
+                    ComplexNumber.multiply([
+                        imaginaryUnit, number
+                    ]),
+                    ComplexNumber.sqrt([
+                        ComplexNumber.subtract([
+                            one,
+                            ComplexNumber.square([number])
+                        ])
+                    ])
+                ])
+            ])
+        ]);
     }
 
 }
