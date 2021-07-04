@@ -1,7 +1,8 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
 
 let onFunction = function() {
-    this.insertOperation('*');
+    this.makeLastNumComplex();
+    this.insertOperator('*');
     this.insertNumber();
     this.isDecimal = 0;
 };

@@ -4,6 +4,12 @@ const ComplexNumber = require('../../ComplexNumberClass');
 const NumberSymbolMap = require('../NumberSymbolMap');
 const Operation = require('./OperationClass');
 const OperationArray = require('./OperationArrayClass');
+const Expression = require('./ExpressionClass');
+const InvalidExpression = require('./InvalidExpressionClass');
+const { findCharFromArrayAndIndex } = require('../CharacterTypes');
+const { CharacterTypes, validEndingTypes } = require('../CharacterTypes');
+const OperatorFunctionMap = require('../OperatorFunctionMap');
+const FunctionNameInformationMap = require('../FunctionNameInformationMap');
 
 class UnsortedExpression {
     constructor(exprString) {
@@ -32,25 +38,52 @@ class UnsortedExpression {
     }
 
     insertNumber() {
-        let number = NumberSymbolMap.get(this.character);
+        const number = NumberSymbolMap.get(this.character);
         this.numbers.push(number);
     }
 
-    insertOperation(operatorSymbol) {
-        if (!this.operations[this.currentNestingLvl]) this.operations[this.currentNestingLvl] = new OperationArray();
-        const operation = new Operation(operatorSymbol, this.numbersLen - 1, 2);
-
-        if (operatorSymbol == '+' || operatorSymbol == '-') this.operations[this.currentNestingLvl].addSub.push(operation);
-        else if (operatorSymbol == '*' || operatorSymbol == '/') this.operations[this.currentNestingLvl].multDiv.push(operation);
-        else if (operatorSymbol == '^' || operatorSymbol == '**') this.operations[this.currentNestingLvl].exponents.unshift(operation); 
-    } 
+    insertOperator(operatorSymbol) {
+        const nestingLvl = this.currentNestingLvl;
+        const arrayExistsAtNestingLvl = !!this.operations[nestingLvl];
+        const operatorFunction = OperatorFunctionMap.get(operatorSymbol);
+        const operation = new Operation(operatorFunction, this.numbersLen - 1, 2);
+        
+        if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();        
+        
+        if (operatorSymbol == '+' || operatorSymbol == '-') this.operations[nestingLvl].insertIntoAddSub(operation);
+        else if (operatorSymbol == '*' || operatorSymbol == '/' || operatorSymbol == '÷') this.operations[nestingLvl].insertIntoMultDiv(operation);
+        else if (operatorSymbol == '^' || operatorSymbol == '**') this.operations[nestingLvl].insertIntoExponents(operation);   
+    }
     
-    update(character, strIndex, charLen) {
-        [this.character, this.strIndex, this.charLen] = [character, strIndex, charLen];
+    insertFunction(functionName) {
+        const nestingLvl = this.currentNestingLvl;
+        const arrayExistsAtNestingLvl = !!this.operations[nestingLvl];
+        const functionInformation = FunctionNameInformationMap.get(functionName);
+        const operatorFunction = functionInformation.func;
+        const operation = new Operation(operatorFunction, this.numbersLen, functionInformation.minNumOfInputs);
+        
+        if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();
+
+        this.operations[nestingLvl].insertIntoFunctions(operation);
+    }
+
+    update() {
+        this.lastCharacter = this.character;
+        this.character = findCharFromArrayAndIndex(this.exprArray, this.strIndex);
+        this.charLen = this.character.length;
     }
 
     makeLastNumComplex() {
         this.numbers[this.numbersLen - 1] = new ComplexNumber(this.lastNumber, 0);
+    }
+
+    completeParse() {
+        if (!validEndingTypes.has(CharacterTypes.get(this.character))) return new InvalidExpression(
+            `Can't end an expression with a "${this.character}".`, undefined);
+    
+        const operations = this.operations.reduce((total, value) => value.merge().concat(total), []);
+        const numbers = this.numbers;
+        return new Expression(numbers, operations);
     }
 
 }

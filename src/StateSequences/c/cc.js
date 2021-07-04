@@ -1,7 +1,7 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
 
 const onFunction = function() {
-    this.insertOperation('*');
+    this.insertOperator('*');
     this.insertNumber();
 };
 

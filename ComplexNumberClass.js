@@ -11,7 +11,7 @@ class ComplexNumber {
         if (this.real == 0 && this.imaginary == -1) return '-i';
         if (this.real == 0) return `${this.imaginary}i`;
 
-        //special values for the imaginary part
+        //special num2s for the imaginary part
         if (this.imaginary == 1) return `${this.real}+i`;
         if (this.imaginary == -1) return `${this.real}-i`;
         if (this.imaginary == 0) return `${this.real}`;
@@ -52,34 +52,62 @@ class ComplexNumber {
         return Math.PI / -2;
     }
 
-    static add(num1, num2) {
-        return new ComplexNumber(num1.real + num2.real, num1.imaginary + num2.imaginary);
+    static add(arrayOfNums) {
+        return arrayOfNums.reduce((num1, num2) => 
+            new ComplexNumber(
+                num1.real + num2.real, num1.imaginary + num2.imaginary
+            )
+        );
+    }
+    
+    static subtract(arrayOfNums) {
+        return arrayOfNums.reduce((num1, num2) => 
+            new ComplexNumber(
+                num1.real - num2.real, num1.imaginary - num2.imaginary
+            )
+        );
+    }
+    
+    static multiply(arrayOfNums) {
+        return arrayOfNums.reduce((num1, num2) =>
+            new ComplexNumber(num1.real*num2.real - num1.imaginary*num2.imaginary,
+               num1.real*num2.imaginary + num1.imaginary*num2.real
+            )
+        );
+    }
+    
+    static divide(arrayOfNums) {
+        return arrayOfNums.reduce((num1, num2) => {
+            const denominator = num2.real ** 2 + num2.imaginary ** 2;
+
+            return new ComplexNumber(
+                (num1.real*num2.real + num1.imaginary*num2.imaginary) / denominator,
+                (num1.imaginary*num2.real - num1.real*num2.imaginary) /denominator
+            )
+        });
+    }
+    
+    static exponentiate(arrayOfNums) {
+        return arrayOfNums.reduce((num1, num2) => {
+            const magnitude = Math.pow(num1.magnitude, num2.real) * Math.exp(-1 * num2.imaginary * num1.angle);
+            const angle = num2.real * num1.angle + num2.imaginary * Math.log(num1.magnitude);
+
+            return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+        })
     }
 
-    static subtract(num1, num2) {
-        return new ComplexNumber(num1.real - num2.real, num1.imaginary - num2.imaginary);
+    static exp(arrayOfNums) {
+        const EulersNum = new ComplexNumber(Math.E, 0);
+        return ComplexNumber.exponentiate([EulersNum, arrayOfNums[0]]);
     }
 
-    static multiply(num1, num2) {
+    static ln(arrayOfNums) {
+        const number = arrayOfNums[0];
         return new ComplexNumber(
-            num1.real*num2.real - num1.imaginary*num2.imaginary,
-            num1.real*num2.imaginary + num1.imaginary*num2.real
-        )
+            Math.log(number.magnitude), number.angle
+        );
     }
 
-    static divide(num1, num2) {
-        const denominator = num2.real**2 + num2.imaginary**2;
-        return new ComplexNumber(
-            (num1.real*num2.real + num1.imaginary*num2.imaginary) / denominator,
-            (num1.imaginary*num1.real - num1.real*num2.imaginary) /denominator
-        )
-    }
-
-    static exponentiate(num1, num2) {
-        const magnitude = Math.pow(num1.magnitude, num2.real) * Math.exp(-1 * num2.imaginary * num1.angle);
-        const angle = num2.real * num1.angle + num2.imaginary * Math.log(num1.magnitude);
-        return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
-    }
 }
 
 module.exports = ComplexNumber;

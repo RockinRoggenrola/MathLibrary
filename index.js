@@ -4,6 +4,6 @@ let math = {
     Expression: require('./src/Classes/ExpressionClass')
 };
 
-console.log(math.compute(''));
+console.log(math.compute('(5-3)exp(pi)'));
 
 module.exports = math;

@@ -10,7 +10,7 @@ const onFunction = function() {
     if (operatorSymbol == '+') return;
     
     this.numbers.push(new ComplexNumber(-1, 0));
-    this.insertOperation('*');
+    this.insertOperator('*');
 };
 
 module.exports = new StateSequence('b', 'o', onFunction);

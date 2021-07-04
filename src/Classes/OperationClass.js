@@ -1,11 +1,10 @@
-const OperatorFunctionMap = require('../OperatorFunctionMap');
-
 class Operation {
-    constructor(operatorSymbol, firstIndex, numOfInputs) {
-        this.func = OperatorFunctionMap.get(operatorSymbol);
+    constructor(func, firstIndex, numOfInputs) {
+        this.func = func;
         this.firstIndex = firstIndex;
         this.numOfInputs = numOfInputs
     }
+    
     get indicies() {
         let indicies = [];
 

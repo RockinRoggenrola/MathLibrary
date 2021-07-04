@@ -5,12 +5,12 @@ const ComplexNumber = require('../../../ComplexNumberClass');
 const onFunction = function() {
     const operatorSymbol = this.character;
 
-    if (operatorSymbol != '+' && operatorSymbol != '-') return //to next line ->
-    new InvalidExpression(`Can't have a ${operatorSymbol} after an opening parenthesis.`, this.strIndex + 1);
+    if (operatorSymbol != '+' && operatorSymbol != '-') // to next line -> 
+    return new InvalidExpression(`Can't have a ${operatorSymbol} after an opening parenthesis.`, this.strIndex + 1);
     if (operatorSymbol == '+') return;
     
     this.numbers.push(new ComplexNumber(-1, 0));
-    this.insertOperation('*');
+    this.insertOperator('*');
 };
 
 module.exports = new StateSequence('l', 'o', onFunction);
