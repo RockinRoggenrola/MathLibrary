@@ -6,15 +6,15 @@ class ComplexNumber {
 
     toString() {
         // the real part is 0
-        if (this.imaginary == 0 && this.real == 0) return '0';
-        if (this.real == 0 && this.imaginary == 1) return 'i';
-        if (this.real == 0 && this.imaginary == -1) return '-i';
-        if (this.real == 0) return `${this.imaginary}i`;
+        if (this.imaginary === 0 && this.real === 0) return '0';
+        if (this.real === 0 && this.imaginary === 1) return 'i';
+        if (this.real === 0 && this.imaginary == -1) return '-i';
+        if (this.real === 0) return `${this.imaginary}i`;
 
         //special num2s for the imaginary part
-        if (this.imaginary == 1) return `${this.real}+i`;
-        if (this.imaginary == -1) return `${this.real}-i`;
-        if (this.imaginary == 0) return `${this.real}`;
+        if (this.imaginary === 1) return `${this.real}+i`;
+        if (this.imaginary === -1) return `${this.real}-i`;
+        if (this.imaginary === 0) return `${this.real}`;
         
         //the regular/default case
         if (this.imaginary > 0) return `${this.real}+${this.imaginary}i`;
@@ -36,7 +36,7 @@ class ComplexNumber {
     }
 
     equals(that) {
-        return (this.real == that.real && this.imaginary == that.imaginary);
+        return (this.real === that.real && this.imaginary === that.imaginary);
     }
 
     get magnitude() {
@@ -47,7 +47,7 @@ class ComplexNumber {
         if (this.real > 0) return Math.atan(this.imaginary / this.real);
         if (this.real < 0 && this.imaginary >= 0) return Math.atan(this.imaginary / this.real) + Math.PI;
         if (this.real < 0 && this.imaginary <= 0) return Math.atan(this.imaginary / this.real) - Math.PI;
-        if (this.imaginary == 0) return 0;
+        if (this.imaginary === 0) return 0;
         if (this.imaginary > 0) return Math.PI / 2;
         return Math.PI / -2;
     }
@@ -89,6 +89,9 @@ class ComplexNumber {
     
     static exponentiate(arrayOfNums) {
         return arrayOfNums.reduce((num1, num2) => {
+            if (num2.magnitude === 0) return new ComplexNumber(1, 0);
+            if (num1.magnitude === 0) return new ComplexNumber(0, 0);
+
             const magnitude = Math.pow(num1.magnitude, num2.real) * Math.exp(-1 * num2.imaginary * num1.angle);
             const angle = num2.real * num1.angle + num2.imaginary * Math.log(num1.magnitude);
 
@@ -243,6 +246,144 @@ class ComplexNumber {
                         ])
                     ])
                 ])
+            ])
+        ]);
+    }
+    
+    static acos(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const imaginaryUnit = new ComplexNumber(0, 1);
+        const one = new ComplexNumber(1, 0);
+        const negativeOne = new ComplexNumber(-1, 0);
+        return ComplexNumber.multiply([
+            negativeOne,
+            imaginaryUnit,
+            ComplexNumber.ln([
+                ComplexNumber.add([
+                    number,
+                    ComplexNumber.sqrt([
+                        ComplexNumber.subtract([
+                            ComplexNumber.square([number]),
+                            one
+                        ])
+                    ])
+                ])
+            ])
+        ]);
+    }
+
+    static atan(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const imaginaryUnit = new ComplexNumber(0, 1);
+        const oneHalf = new ComplexNumber(1/2, 0);
+        return ComplexNumber.multiply([
+            imaginaryUnit,
+            oneHalf,
+            ComplexNumber.ln([
+                ComplexNumber.divide([
+                    ComplexNumber.add([
+                        number, imaginaryUnit
+                    ]),
+                    ComplexNumber.subtract([
+                        number, imaginaryUnit
+                    ])
+                ])
+            ])
+        ]);
+    }
+
+    
+    static asec(arrayOfNums) {
+        return ComplexNumber.acos([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
+            ])
+        ]);
+    }
+    
+    static acsc(arrayOfNums) {
+        return ComplexNumber.asin([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
+            ])
+        ]);
+    }
+    
+    static acot(arrayOfNums) {
+        return ComplexNumber.atan([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
+            ])
+        ]);
+    }
+    
+    static asinh(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const one = new ComplexNumber(1, 0);
+        return ComplexNumber.ln([
+            ComplexNumber.add([
+                number,
+                ComplexNumber.sqrt([
+                    ComplexNumber.add([
+                        ComplexNumber.square([number]),
+                        one
+                    ])
+                ])
+            ])
+        ]);
+    }
+    
+    static acosh(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const one = new ComplexNumber(1, 0);
+        return ComplexNumber.ln([
+            ComplexNumber.add([
+                number,
+                complex.sqrt([
+                    ComplexNumber.subtract([
+                        ComplexNumber.square([number]),
+                        one
+                    ])
+                ])
+            ])
+        ]);
+    }
+    
+    static atanh(arrayOfNums) {
+        const number = arrayOfNums[0];
+        const one = new ComplexNumber(1, 0);
+        const oneHalf = new ComplexNumber(1/2, 0);
+        return ComplexNumber.multiply([
+            oneHalf,
+            ComplexNumber.ln([
+                ComplexNumber.divide([
+                    ComplexNumber.add([one, number]),
+                    ComplexNumber.subtract([one, number])
+                ])
+            ])
+        ]);
+    }
+    
+    static asech(arrayOfNums) {
+        return ComplexNumber.acosh([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
+            ])
+        ]);
+    }
+    
+    static acsch(arrayOfNums) {
+        return ComplexNumber.asinh([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
+            ])
+        ]);
+    }
+    
+    static acoth(arrayOfNums) {
+        return ComplexNumber.asinh([
+            ComplexNumber.recripocate([
+                arrayOfNums[0]
             ])
         ]);
     }

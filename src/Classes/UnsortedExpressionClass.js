@@ -15,6 +15,7 @@ class UnsortedExpression {
     constructor(exprString) {
         this.operations = [];
         this.numbers = [];
+        this.unresolvedFunctions = [];
         this.character = '';
         this.lastCharacter = '';
         this.charLen = 0;
@@ -34,7 +35,7 @@ class UnsortedExpression {
     }
     
     get isIndexAtEndOfExpr() {
-        return this.exprArray.length == this.strIndex + 1;
+        return this.exprArray.length === this.strIndex + 1;
     }
 
     insertNumber() {
@@ -50,9 +51,24 @@ class UnsortedExpression {
         
         if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();        
         
-        if (operatorSymbol == '+' || operatorSymbol == '-') this.operations[nestingLvl].insertIntoAddSub(operation);
-        else if (operatorSymbol == '*' || operatorSymbol == '/' || operatorSymbol == '÷') this.operations[nestingLvl].insertIntoMultDiv(operation);
-        else if (operatorSymbol == '^' || operatorSymbol == '**') this.operations[nestingLvl].insertIntoExponents(operation);   
+        if (operatorSymbol === '+' || operatorSymbol === '-') this.operations[nestingLvl].insertIntoAddSub(operation);
+        else if (operatorSymbol === '*' || operatorSymbol === '/' || operatorSymbol === '÷') this.operations[nestingLvl].insertIntoMultDiv(operation);
+        else if (operatorSymbol === '^' || operatorSymbol === '**') this.operations[nestingLvl].insertIntoExponents(operation);   
+    }
+    
+    update() {
+        this.lastCharacter = this.character;
+        this.character = findCharFromArrayAndIndex(this.exprArray, this.strIndex);
+        this.charLen = this.character.length;
+    }
+    
+    makeLastNumComplex() {
+        this.numbers[this.numbersLen - 1] = new ComplexNumber(this.lastNumber, 0);
+    }
+    
+    checkForInvalidCommas() {
+        if (!this.unresolvedFunctions.length)
+        return new InvalidExpression('Can\'t use commas to separate the arguments of a function outside of a function.', this.strIndex + 1);
     }
     
     insertFunction(functionName) {
@@ -60,21 +76,39 @@ class UnsortedExpression {
         const arrayExistsAtNestingLvl = !!this.operations[nestingLvl];
         const functionInformation = FunctionNameInformationMap.get(functionName);
         const operatorFunction = functionInformation.func;
-        const operation = new Operation(operatorFunction, this.numbersLen, functionInformation.minNumOfInputs);
+        const operation = new Operation(operatorFunction, this.numbersLen, 0);
         
         if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();
 
         this.operations[nestingLvl].insertIntoFunctions(operation);
+        this.unresolvedFunctions.push({
+            strIndex: this.strIndex, 
+            currentNumOfInputs: 0, 
+            operatorIndex: this.operations.length - 1,
+            functionName
+        });
     }
-
-    update() {
-        this.lastCharacter = this.character;
-        this.character = findCharFromArrayAndIndex(this.exprArray, this.strIndex);
-        this.charLen = this.character.length;
+    
+    resolveFunction() {
+        const lastUnresolvedFunction = this.unresolvedFunctions.pop();
+        const numOfInputs = lastUnresolvedFunction.currentNumOfInputs;
+        const minNumOfInputs = FunctionNameInformationMap.get(lastUnresolvedFunction.functionName).minNumOfInputs;
+        
+        if (numOfInputs < minNumOfInputs)
+        return new InvalidExpression(`There are not enough arguments in the ${lastUnresolvedFunction.functionName} function. There can't be less than ${minNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
     }
-
-    makeLastNumComplex() {
-        this.numbers[this.numbersLen - 1] = new ComplexNumber(this.lastNumber, 0);
+    
+    insertFunctionArgument() {
+        const lastUnresolvedFunction = this.unresolvedFunctions[this.unresolvedFunctions.length - 1];
+        const numOfInputs = lastUnresolvedFunction.currentNumOfInputs + 1;
+        const maxNumOfInputs = FunctionNameInformationMap.get(lastUnresolvedFunction.functionName).maxNumOfInputs;
+        
+        this.unresolvedFunctions[this.unresolvedFunctions.length - 1].currentNumOfInputs = numOfInputs;
+        this.operations[lastUnresolvedFunction.operatorIndex].numOfInputs = numOfInputs;
+        
+        if (maxNumOfInputs === 'multi') return;
+        if (numOfInputs > maxNumOfInputs)
+        return new InvalidExpression(`There are too many arguments in the ${lastUnresolvedFunction.functionName} function. There can't be more than ${maxNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
     }
 
     completeParse() {
@@ -89,15 +123,13 @@ class UnsortedExpression {
 }
 
 process.chdir(__dirname);
-let stateSequcenceFiles = [];
-fs.readdirSync('../StateSequences').forEach(value => {
-    const fileArray = fs.readdirSync(`../StateSequences/${value}`).filter(file => file.endsWith('.js'));
-    stateSequcenceFiles = [...stateSequcenceFiles, ...fileArray];
-});
+fs.readdirSync('../StateSequences').forEach(folder => {
+    const fileArray = fs.readdirSync(`../StateSequences/${folder}`).filter(file => file.endsWith('.js'));
 
-stateSequcenceFiles.forEach(value => {
-    const file = require(`../StateSequences/${value[0]}/${value}`);
-    UnsortedExpression.prototype[file.stateSequenceAsStr] = file.onFunction; 
-})
+    fileArray.forEach(file => {
+        const fileExports = require(`../StateSequences/${folder}/${file}`);
+        UnsortedExpression.prototype[fileExports.stateSequenceAsStr] = fileExports.onFunction;
+    })
+});
 
 module.exports = UnsortedExpression;

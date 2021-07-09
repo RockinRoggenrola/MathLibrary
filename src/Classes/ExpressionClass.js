@@ -5,7 +5,7 @@ class Expression {
     }
     
     evaluate() {
-        if (this.operations.length == 0) return this.numbers[0].fixPrecision();
+        if (this.operations.length === 0) return this.numbers[0].fixPrecision();
         
         const operation = this.operations[0];
         const operationInputs = operation.indicies.map(value => this.numbers[value]);
