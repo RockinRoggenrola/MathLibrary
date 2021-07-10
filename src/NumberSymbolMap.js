@@ -18,6 +18,7 @@ NumberSymbolMap.set('tau', new ComplexNumber(2*Math.PI, 0));
 NumberSymbolMap.set('τ', new ComplexNumber(2*Math.PI, 0));
 NumberSymbolMap.set('e', new ComplexNumber(Math.E, 0));
 NumberSymbolMap.set('°', new ComplexNumber(Math.PI / 180, 0));
+NumberSymbolMap.set('deg', new ComplexNumber(Math.PI / 180, 0));
 NumberSymbolMap.set('i', new ComplexNumber(0, 1));
 
 module.exports = NumberSymbolMap;

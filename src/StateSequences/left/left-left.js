@@ -1,7 +1,7 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
 
 const onFunction = function() {
-    this.currentNestingLvl++;
+    this.nestingLvl++;
     this.isDecimal = 0;
 };
 

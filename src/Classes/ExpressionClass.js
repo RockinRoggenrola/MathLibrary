@@ -8,12 +8,12 @@ class Expression {
         if (this.operations.length === 0) return this.numbers[0].fixPrecision();
         
         const operation = this.operations[0];
-        const operationInputs = operation.indicies.map(value => this.numbers[value]);
+        const operationInputs = operation.indiciesArray.map(value => this.numbers[value]);
         const operationOutput = operation.func(operationInputs);
         let placeHolderExpr = this;
 
         placeHolderExpr.operations.shift();
-        placeHolderExpr.numbers.splice(operation.indicies[0], operation.numOfInputs, operationOutput);
+        placeHolderExpr.numbers.splice(operation.indiciesArray[0], operation.numOfInputs, operationOutput);
 
         for (let i = 0; i < placeHolderExpr.operations.length; i++) {
             const operation2 = placeHolderExpr.operations[i];

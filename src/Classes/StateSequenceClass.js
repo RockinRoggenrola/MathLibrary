@@ -4,6 +4,7 @@ class StateSequence {
         this.char2type = char2type;
         this.onFunction = onFunction;
     }
+    
     get stateSequenceAsStr() {
         return this.char1type + this.char2type;
     }

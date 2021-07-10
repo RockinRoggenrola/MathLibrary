@@ -15,19 +15,19 @@ class UnsortedExpression {
     constructor(exprString) {
         this.operations = [];
         this.numbers = [];
-        this.unresolvedFunctions = [];
+        this.pendingFunctions = [];
         this.character = '';
         this.lastCharacter = '';
         this.charLen = 0;
         this.isDecimal = 0;
         this.strIndex = 0;
-        this.currentNestingLvl = 0;
+        this.nestingLvl = 0;
         this.exprArray = 
         exprString.trim().toLowerCase().split(/ +/).join().split('');
     }
 
     get numbersLen() {
-        return this.numbers.length
+        return this.numbers.length;
     }
 
     get lastNumber() {
@@ -36,24 +36,6 @@ class UnsortedExpression {
     
     get isIndexAtEndOfExpr() {
         return this.exprArray.length === this.strIndex + 1;
-    }
-
-    insertNumber() {
-        const number = NumberSymbolMap.get(this.character);
-        this.numbers.push(number);
-    }
-
-    insertOperator(operatorSymbol) {
-        const nestingLvl = this.currentNestingLvl;
-        const arrayExistsAtNestingLvl = !!this.operations[nestingLvl];
-        const operatorFunction = OperatorFunctionMap.get(operatorSymbol);
-        const operation = new Operation(operatorFunction, this.numbersLen - 1, 2);
-        
-        if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();        
-        
-        if (operatorSymbol === '+' || operatorSymbol === '-') this.operations[nestingLvl].insertIntoAddSub(operation);
-        else if (operatorSymbol === '*' || operatorSymbol === '/' || operatorSymbol === '÷') this.operations[nestingLvl].insertIntoMultDiv(operation);
-        else if (operatorSymbol === '^' || operatorSymbol === '**') this.operations[nestingLvl].insertIntoExponents(operation);   
     }
     
     update() {
@@ -65,55 +47,93 @@ class UnsortedExpression {
     makeLastNumComplex() {
         this.numbers[this.numbersLen - 1] = new ComplexNumber(this.lastNumber, 0);
     }
+
+    initializeOperationArrayAtNestingLvl() {
+        const nestingLvl = this.nestingLvl;
+        const thereIsOperationArrayAtNestingLvl = !!this.operations[nestingLvl];
+
+        if (!thereIsOperationArrayAtNestingLvl) this.operations[nestingLvl] = new OperationArray();
+    }
     
-    checkForInvalidCommas() {
-        if (!this.unresolvedFunctions.length)
-        return new InvalidExpression('Can\'t use commas to separate the arguments of a function outside of a function.', this.strIndex + 1);
+    insertNumber() {
+        const number = NumberSymbolMap.get(this.character);
+        this.numbers.push(number);
+    }
+    
+    insertOperator(operatorSymbol) {
+        this.initializeOperationArrayAtNestingLvl();
+
+        const nestingLvl = this.nestingLvl;
+        const operatorFunction = OperatorFunctionMap.get(operatorSymbol);
+        const operation = new Operation(operatorFunction, this.numbersLen - 1, 2);
+        
+        switch (operatorSymbol) {
+            case '+':
+            case '-':
+                this.operations[nestingLvl].insertIntoAddSub(operation);
+                break;
+            case '*':
+            case '/':
+            case '÷':
+                this.operations[nestingLvl].insertIntoMultDiv(operation);
+                break;
+            case '^':
+            case '**':
+                this.operations[nestingLvl].insertIntoExponents(operation);
+                break;
+        }
     }
     
     insertFunction(functionName) {
-        const nestingLvl = this.currentNestingLvl;
-        const arrayExistsAtNestingLvl = !!this.operations[nestingLvl];
-        const functionInformation = FunctionNameInformationMap.get(functionName);
-        const operatorFunction = functionInformation.func;
+        this.initializeOperationArrayAtNestingLvl();
+    
+        const nestingLvl = this.nestingLvl;
+        const operatorFunction = FunctionNameInformationMap.get(functionName).func;
         const operation = new Operation(operatorFunction, this.numbersLen, 0);
         
-        if (!arrayExistsAtNestingLvl) this.operations[nestingLvl] = new OperationArray();
-
         this.operations[nestingLvl].insertIntoFunctions(operation);
-        this.unresolvedFunctions.push({
+        this.pendingFunctions.push({
             strIndex: this.strIndex, 
             currentNumOfInputs: 0, 
-            operatorIndex: this.operations.length - 1,
+            operatorIndex: this.operations[this.nestingLvl].functions.length - 1,
             functionName
         });
     }
     
-    resolveFunction() {
-        const lastUnresolvedFunction = this.unresolvedFunctions.pop();
-        const numOfInputs = lastUnresolvedFunction.currentNumOfInputs;
-        const minNumOfInputs = FunctionNameInformationMap.get(lastUnresolvedFunction.functionName).minNumOfInputs;
-        
-        if (numOfInputs < minNumOfInputs)
-        return new InvalidExpression(`There are not enough arguments in the ${lastUnresolvedFunction.functionName} function. There can't be less than ${minNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
-    }
-    
     insertFunctionArgument() {
-        const lastUnresolvedFunction = this.unresolvedFunctions[this.unresolvedFunctions.length - 1];
+        if (!this.pendingFunctions.length) return;
+
+        const lastUnresolvedFunction = this.pendingFunctions[this.pendingFunctions.length - 1];
         const numOfInputs = lastUnresolvedFunction.currentNumOfInputs + 1;
         const maxNumOfInputs = FunctionNameInformationMap.get(lastUnresolvedFunction.functionName).maxNumOfInputs;
         
-        this.unresolvedFunctions[this.unresolvedFunctions.length - 1].currentNumOfInputs = numOfInputs;
-        this.operations[lastUnresolvedFunction.operatorIndex].numOfInputs = numOfInputs;
+        this.pendingFunctions[this.pendingFunctions.length - 1].currentNumOfInputs = numOfInputs;
+        this.operations[this.nestingLvl - 1].functions[lastUnresolvedFunction.operatorIndex].numOfInputs = numOfInputs;
         
         if (maxNumOfInputs === 'multi') return;
         if (numOfInputs > maxNumOfInputs)
         return new InvalidExpression(`There are too many arguments in the ${lastUnresolvedFunction.functionName} function. There can't be more than ${maxNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
     }
+    
+    checkForInvalidCommas() {
+        if (!this.pendingFunctions.length) // checks that there are no resolved functions
+        return new InvalidExpression('Can\'t use commas to separate the arguments of a function outside of a function.', this.strIndex + 1);
+    }
+    
+    resolveFunction() {
+        if (!this.pendingFunctions.length) return;
+    
+        const lastPendingFunc = this.pendingFunctions.pop();
+        const numOfInputs = lastPendingFunc.currentNumOfInputs;
+        const minNumOfInputs = FunctionNameInformationMap.get(lastPendingFunc.functionName).minNumOfInputs;
+    
+        if (numOfInputs < minNumOfInputs)
+        return new InvalidExpression(`There are not enough arguments in the ${lastUnresolvedFunction.functionName} function. There can't be less than ${minNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
+    }
 
     completeParse() {
         if (!validEndingTypes.has(CharacterTypes.get(this.character))) return new InvalidExpression(
-            `Can't end an expression with a "${this.character}".`, undefined);
+        `Can't end an expression with a "${this.character}".`, null);
     
         const operations = this.operations.reduce((total, value) => value.merge().concat(total), []);
         const numbers = this.numbers;

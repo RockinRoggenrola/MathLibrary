@@ -1,7 +1,7 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
 
 let onFunction = function() {
-    this.currentNestingLvl++;
+    this.nestingLvl++;
 };
 
 module.exports = new StateSequence('operator', 'left', onFunction);

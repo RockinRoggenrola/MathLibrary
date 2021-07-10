@@ -1,28 +1,53 @@
 const ComplexNumber = require("../ComplexNumberClass");
 
 class FunctionDescription {
-    constructor(maxNumOfInputs, minNumOfInputs, func) {
-        this.maxNumOfInputs = maxNumOfInputs;
+    constructor(minNumOfInputs, maxNumOfInputs, func) {
         this.minNumOfInputs = minNumOfInputs;
+        this.maxNumOfInputs = maxNumOfInputs;
         this.func = func;
     }
 }
 
 const FunctionNameInformationMap = new Map();
 
+FunctionNameInformationMap.set('add', new FunctionDescription(1, 'multi', ComplexNumber.add));
+FunctionNameInformationMap.set('subtract', new FunctionDescription(1, 'multi', ComplexNumber.subtract));
+FunctionNameInformationMap.set('multiply', new FunctionDescription(1, 'multi', ComplexNumber.multiply));
+FunctionNameInformationMap.set('divide', new FunctionDescription(1, 'multi', ComplexNumber.divide));
+FunctionNameInformationMap.set('exponentiate', new FunctionDescription(1, 'multi', ComplexNumber.exponentiate));
+
+FunctionNameInformationMap.set('average', new FunctionDescription(1, 'multi', ComplexNumber.average));
+FunctionNameInformationMap.set('avg', new FunctionDescription(1, 'multi', ComplexNumber.average));
+
 FunctionNameInformationMap.set('square', new FunctionDescription(1, 1, ComplexNumber.square));
 FunctionNameInformationMap.set('cube', new FunctionDescription(1, 1, ComplexNumber.cube));
 
 FunctionNameInformationMap.set('sqrt', new FunctionDescription(1, 1, ComplexNumber.sqrt));
+FunctionNameInformationMap.set('√', new FunctionDescription(1, 1, ComplexNumber.sqrt));
+
 FunctionNameInformationMap.set('cbrt', new FunctionDescription(1, 1, ComplexNumber.cbrt));
+FunctionNameInformationMap.set('∛', new FunctionDescription(1, 1, ComplexNumber.cbrt));
 
 FunctionNameInformationMap.set('recripocate', new FunctionDescription(1, 1, ComplexNumber.recripocate));
+
+FunctionNameInformationMap.set('abs', new FunctionDescription(1, 1, ComplexNumber.abs));
+FunctionNameInformationMap.set('magnitude', new FunctionDescription(1, 1, ComplexNumber.abs));
+
+FunctionNameInformationMap.set('arg', new FunctionDescription(1, 1, ComplexNumber.argument));
+FunctionNameInformationMap.set('argument', new FunctionDescription(1, 1, ComplexNumber.argument));
+FunctionNameInformationMap.set('angle', new FunctionDescription(1, 1, ComplexNumber.argument));
+
+FunctionNameInformationMap.set('floor', new FunctionDescription(1, 1, ComplexNumber.floor));
+FunctionNameInformationMap.set('flr', new FunctionDescription(1, 1, ComplexNumber.floor));
+
+FunctionNameInformationMap.set('ceiling', new FunctionDescription(1, 1, ComplexNumber.ceiling));
+FunctionNameInformationMap.set('ceil', new FunctionDescription(1, 1, ComplexNumber.ceiling));
 
 FunctionNameInformationMap.set('exp', new FunctionDescription(1, 1, ComplexNumber.exp));
 FunctionNameInformationMap.set('ln', new FunctionDescription(1, 1, ComplexNumber.ln));
 
 FunctionNameInformationMap.set('sin', new FunctionDescription(1, 1, ComplexNumber.sin));
-FunctionNameInformationMap.set('cos', new FunctionDescription(1, 1, ComplexNumber.cos));
+FunctionNameInformationMap.set('cos', new FunctionDescription(1, 2, ComplexNumber.cos));
 FunctionNameInformationMap.set('tan', new FunctionDescription(1, 1, ComplexNumber.tan));
 FunctionNameInformationMap.set('sec', new FunctionDescription(1, 1, ComplexNumber.sec));
 FunctionNameInformationMap.set('csc', new FunctionDescription(1, 1, ComplexNumber.csc));

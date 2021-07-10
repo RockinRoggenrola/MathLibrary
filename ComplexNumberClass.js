@@ -99,6 +99,13 @@ class ComplexNumber {
         })
     }
 
+    static average(arrayOfNums) {
+        return ComplexNumber.divide([
+            ComplexNumber.add(arrayOfNums),
+            new ComplexNumber(arrayOfNums.length, 0)
+        ]);
+    }
+
     static square(arrayOfNums) {
         const number = arrayOfNums[0];
         const two = new ComplexNumber(2, 0);
@@ -125,6 +132,38 @@ class ComplexNumber {
         const number = arrayOfNums[0];
         const one = new ComplexNumber(1, 0);
         return ComplexNumber.divide([one, number]);
+    }
+
+    static abs(arrayOfNums) {
+        return new ComplexNumber(arrayOfNums[0].magnitude, 0);
+    }
+
+    static argument(arrayOfNums) {
+        return new ComplexNumber(arrayOfNums[0].angle, 0);
+    }
+
+    static floor(arrayOfNums) {
+        const number = arrayOfNums[0];
+
+        return ComplexNumber.multiply([
+            number,
+            ComplexNumber.divide([
+                new ComplexNumber(Math.floor(number.magnitude), 0),
+                new ComplexNumber(number.magnitude, 0)
+            ])
+        ]);
+    }
+    
+    static ceiling(arrayOfNums) {
+        const number = arrayOfNums[0];
+
+        return ComplexNumber.multiply([
+            number,
+            ComplexNumber.divide([
+                new ComplexNumber(Math.ceil(number.magnitude), 0),
+                new ComplexNumber(number.magnitude, 0)
+            ])
+        ]);
     }
 
     static exp(arrayOfNums) {
@@ -339,7 +378,7 @@ class ComplexNumber {
         return ComplexNumber.ln([
             ComplexNumber.add([
                 number,
-                complex.sqrt([
+                ComplexNumber.sqrt([
                     ComplexNumber.subtract([
                         ComplexNumber.square([number]),
                         one

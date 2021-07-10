@@ -1,8 +1,8 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
 
 const onFunction = function() {
-    this.resolveFunction();
-    this.currentNestingLvl--;
+    if (this.resolveFunction()) return this.resolveFunction();
+    this.nestingLvl--;
 };
 
 module.exports = new StateSequence('constant', 'right', onFunction);

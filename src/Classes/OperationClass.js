@@ -5,14 +5,15 @@ class Operation {
         this.numOfInputs = numOfInputs
     }
     
-    get indicies() {
-        let indicies = [];
+    get indiciesArray() {
+        const numOfInputs = this.numOfInputs;
+        let indiciesArray = [];
 
-        for (let i = 0; i < this.numOfInputs; i++) {
-            indicies[i] = this.firstIndex + i;
+        for (let i = 0; i < numOfInputs; i++) {
+            indiciesArray.push(this.firstIndex + i);
         }
         
-        return indicies;
+        return indiciesArray;
     }
 }
 

@@ -11,7 +11,7 @@ class OperationArray {
     }
 
     insertIntoAddSub(operation) {
-        this.addSub.push(operation);
+       this.addSub.push(operation);
     }
 
     insertIntoMultDiv(operation) {
@@ -23,6 +23,7 @@ class OperationArray {
     }
 
     insertIntoFunctions(operation) {
+    
         this.functions.push(operation);
     }
 }

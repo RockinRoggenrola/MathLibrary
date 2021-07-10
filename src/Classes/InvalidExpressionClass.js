@@ -4,6 +4,7 @@ class InvalidExpression {
         this.index =  index;
         this.baseMessage = 'Invalid Expression.';
     }
+    
     get fullMessage() {
         if (!this.index) return `${this.baseMessage} ${this.error}`;
 
