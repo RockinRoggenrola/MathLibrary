@@ -1,9 +1,9 @@
 const StateSequence = require('../../Classes/StateSequenceClass');
+const InvalidExpression = require('../../Classes/InvalidExpressionClass');
+const { RightToLeftGroupingSymbols } = require('../../GroupingSymbols');
 
 const onFunction = function() {
-    this.insertOperator('*');
-    this.numbers.push(0);
-    this.isDecimal = 1;
+    return new InvalidExpression(`Can't have a decimal point after a ${RightToLeftGroupingSymbols.get(this.lastCharacter).singular}.`, this.strIndex + 1)
 };
 
-module.export = new StateSequence('right', 'decimal', onFunction);
+module.exports = new StateSequence('right', 'decimal', onFunction);

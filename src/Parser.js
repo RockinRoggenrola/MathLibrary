@@ -15,7 +15,7 @@ const parse = exprString => {
 
         if (!nextState) return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
         if (currentExpr.checkForInvalidCommas() && character === ',') return currentExpr.checkForInvalidCommas();
-        
+
         const executionValue = currentExpr[currentState + nextState]();
         if (executionValue) return executionValue;
 

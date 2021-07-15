@@ -5,7 +5,7 @@ let math = {
     FunctionNameInformationMap: require('./src/FunctionNameInformationMap')
 };
 
-const expression = ')9-8';
+const expression = '[6-5.]';
 console.log(expression);
 console.log(math.compute(expression));
 

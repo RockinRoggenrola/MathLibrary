@@ -6,7 +6,7 @@ const onFunction = function() {
     const operatorSymbol = this.character;
 
     if (operatorSymbol !== '+' && operatorSymbol !== '-') return //to next line ->
-    new InvalidExpression(`Can't have a ${operatorSymbol} at the beginning of an expression.`, this.strIndex + 1);
+    new InvalidExpression(`Can't have an operator at the beginning of an expression.`, 1);
     if (operatorSymbol === '+') return;
     
     this.numbers.push(new ComplexNumber(-1, 0));
