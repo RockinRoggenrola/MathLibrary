@@ -5,6 +5,8 @@ let math = {
     FunctionNameInformationMap: require('./src/FunctionNameInformationMap')
 };
 
-console.log(math.compute('4+5'));
+const expression = ')9-8';
+console.log(expression);
+console.log(math.compute(expression));
 
 module.exports = math;

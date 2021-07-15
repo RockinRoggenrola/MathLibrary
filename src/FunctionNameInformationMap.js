@@ -37,6 +37,8 @@ FunctionNameInformationMap.set('arg', new FunctionDescription(1, 1, ComplexNumbe
 FunctionNameInformationMap.set('argument', new FunctionDescription(1, 1, ComplexNumber.argument));
 FunctionNameInformationMap.set('angle', new FunctionDescription(1, 1, ComplexNumber.argument));
 
+FunctionNameInformationMap.set('frac', new FunctionDescription(1, 1, ComplexNumber.frac));
+
 FunctionNameInformationMap.set('floor', new FunctionDescription(1, 1, ComplexNumber.floor));
 FunctionNameInformationMap.set('flr', new FunctionDescription(1, 1, ComplexNumber.floor));
 

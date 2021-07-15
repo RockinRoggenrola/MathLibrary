@@ -8,7 +8,7 @@ const parse = exprString => {
     const { exprArray } = currentExpr; 
 
     while (currentExpr.strIndex < exprArray.length) {
-        
+
         currentExpr.update();
         const { character, strIndex } = currentExpr;
         const nextState = CharacterTypes.get(character);
@@ -25,8 +25,8 @@ const parse = exprString => {
         
     }
     
-    if (currentExpr.nestingLvl !== 0) 
-    return new InvalidExpression('Must have the same number of opening parentheses as closing parentheses in your expression.');
+    if (currentExpr.totalNestingLvl !== 0) 
+    return new InvalidExpression('Must have the same number of opening group smybols as closing group symbols in your expression.');
     return currentExpr.completeParse();
 }
 

@@ -23,7 +23,6 @@ class OperationArray {
     }
 
     insertIntoFunctions(operation) {
-    
         this.functions.push(operation);
     }
 }

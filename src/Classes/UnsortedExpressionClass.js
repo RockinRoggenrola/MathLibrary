@@ -10,20 +10,25 @@ const { findCharFromArrayAndIndex } = require('../CharacterTypes');
 const { CharacterTypes, validEndingTypes } = require('../CharacterTypes');
 const OperatorFunctionMap = require('../OperatorFunctionMap');
 const FunctionNameInformationMap = require('../FunctionNameInformationMap');
+const { GroupingSymbolMap, RightToLeftGroupingSymbols } = require('../GroupingSymbols');
 
 class UnsortedExpression {
     constructor(exprString) {
         this.operations = [];
         this.numbers = [];
         this.pendingFunctions = [];
+        this.pendingExprGroups = [];
         this.character = '';
         this.lastCharacter = '';
         this.charLen = 0;
         this.isDecimal = 0;
         this.strIndex = 0;
-        this.nestingLvl = 0;
+        this.totalNestingLvl = 0;
         this.exprArray = 
         exprString.trim().toLowerCase().split(/ +/).join().split('');
+    
+        this.individualNestingLvls = {};
+        GroupingSymbolMap.forEach((value, key) => this.individualNestingLvls[key] = 0);
     }
 
     get numbersLen() {
@@ -49,7 +54,7 @@ class UnsortedExpression {
     }
 
     initializeOperationArrayAtNestingLvl() {
-        const nestingLvl = this.nestingLvl;
+        const nestingLvl = this.totalNestingLvl;
         const thereIsOperationArrayAtNestingLvl = !!this.operations[nestingLvl];
 
         if (!thereIsOperationArrayAtNestingLvl) this.operations[nestingLvl] = new OperationArray();
@@ -63,56 +68,85 @@ class UnsortedExpression {
     insertOperator(operatorSymbol) {
         this.initializeOperationArrayAtNestingLvl();
 
-        const nestingLvl = this.nestingLvl;
+        const totalNestingLvl = this.totalNestingLvl;
         const operatorFunction = OperatorFunctionMap.get(operatorSymbol);
         const operation = new Operation(operatorFunction, this.numbersLen - 1, 2);
         
         switch (operatorSymbol) {
             case '+':
             case '-':
-                this.operations[nestingLvl].insertIntoAddSub(operation);
+                this.operations[totalNestingLvl].insertIntoAddSub(operation);
                 break;
             case '*':
             case '/':
             case '÷':
-                this.operations[nestingLvl].insertIntoMultDiv(operation);
+                this.operations[totalNestingLvl].insertIntoMultDiv(operation);
                 break;
             case '^':
             case '**':
-                this.operations[nestingLvl].insertIntoExponents(operation);
+                this.operations[totalNestingLvl].insertIntoExponents(operation);
                 break;
         }
     }
     
     insertFunction(functionName) {
         this.initializeOperationArrayAtNestingLvl();
-    
-        const nestingLvl = this.nestingLvl;
-        const operatorFunction = FunctionNameInformationMap.get(functionName).func;
-        const operation = new Operation(operatorFunction, this.numbersLen, 0);
         
-        this.operations[nestingLvl].insertIntoFunctions(operation);
+        const totalNestingLvl = this.totalNestingLvl;
+        const operatorFunction = FunctionNameInformationMap.get(functionName).func;
+        const operation = new Operation(operatorFunction, this.numbersLen, 1);
+        
+        this.operations[totalNestingLvl].insertIntoFunctions(operation);
         this.pendingFunctions.push({
             strIndex: this.strIndex, 
-            currentNumOfInputs: 0, 
-            operatorIndex: this.operations[this.nestingLvl].functions.length - 1,
+            currentNumOfInputs: 1, 
+            operatorIndex: this.operations[this.totalNestingLvl].functions.length - 1,
             functionName
         });
     }
     
     insertFunctionArgument() {
         if (!this.pendingFunctions.length) return;
-
+        
         const lastUnresolvedFunction = this.pendingFunctions[this.pendingFunctions.length - 1];
         const numOfInputs = lastUnresolvedFunction.currentNumOfInputs + 1;
         const maxNumOfInputs = FunctionNameInformationMap.get(lastUnresolvedFunction.functionName).maxNumOfInputs;
         
         this.pendingFunctions[this.pendingFunctions.length - 1].currentNumOfInputs = numOfInputs;
-        this.operations[this.nestingLvl - 1].functions[lastUnresolvedFunction.operatorIndex].numOfInputs = numOfInputs;
+        this.operations[this.totalNestingLvl - 1].functions[lastUnresolvedFunction.operatorIndex].numOfInputs = numOfInputs;
         
         if (maxNumOfInputs === 'multi') return;
         if (numOfInputs > maxNumOfInputs)
         return new InvalidExpression(`There are too many arguments in the ${lastUnresolvedFunction.functionName} function. There can't be more than ${maxNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
+    }
+    
+    openExpressionGroup() {
+        this.initializeOperationArrayAtNestingLvl();
+
+        this.operations[this.totalNestingLvl].insertIntoFunctions(new Operation(
+            GroupingSymbolMap.get(this.character).func, 
+            this.numbersLen, 1
+        ));
+        
+        this.totalNestingLvl++;
+        this.individualNestingLvls[this.character]++;
+        this.pendingExprGroups.push(this.character);
+    }
+
+    closeExpressionGroup() {
+        const lastOpeningGroupSymbol = GroupingSymbolMap.get(this.pendingExprGroups[this.pendingExprGroups.length - 1]);
+
+        if (this.totalNestingLvl === 0)
+        return new InvalidExpression(`Can't have a closing ${RightToLeftGroupingSymbols.get(this.character).singular} before you have an opening one.`, 
+        this.strIndex + 1);
+
+        if (this.character !== lastOpeningGroupSymbol.right) 
+        return new InvalidExpression(`Can't close a ${lastOpeningGroupSymbol.singular} with a ${RightToLeftGroupingSymbols.get(this.character).singular}.`,
+        this.strIndex + 1);
+
+        this.pendingExprGroups.pop();
+        this.totalNestingLvl--;
+        this.individualNestingLvls[this.character]--;
     }
     
     checkForInvalidCommas() {
@@ -122,7 +156,7 @@ class UnsortedExpression {
     
     resolveFunction() {
         if (!this.pendingFunctions.length) return;
-    
+
         const lastPendingFunc = this.pendingFunctions.pop();
         const numOfInputs = lastPendingFunc.currentNumOfInputs;
         const minNumOfInputs = FunctionNameInformationMap.get(lastPendingFunc.functionName).minNumOfInputs;

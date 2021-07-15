@@ -166,6 +166,13 @@ class ComplexNumber {
         ]);
     }
 
+    static frac(arrayOfNums) {
+        return ComplexNumber.subtract([
+            arrayOfNums[0],
+            ComplexNumber.floor(arrayOfNums)
+        ])
+    }
+
     static exp(arrayOfNums) {
         const EulersNum = new ComplexNumber(Math.E, 0);
         return ComplexNumber.exponentiate([EulersNum, arrayOfNums[0]]);

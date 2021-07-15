@@ -2,7 +2,7 @@ const StateSequence = require('../../Classes/StateSequenceClass');
 
 const onFunction = function() {
     if (this.resolveFunction()) return this.resolveFunction();
-    this.nestingLvl--;
+    if (this.closeExpressionGroup()) return this.closeExpressionGroup();
 };
 
 module.exports = new StateSequence('constant', 'right', onFunction);
