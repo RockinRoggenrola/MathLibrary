@@ -8,7 +8,7 @@ const Expression = require('./ExpressionClass');
 const InvalidExpression = require('./InvalidExpressionClass');
 const { findCharFromArrayAndIndex } = require('../CharacterTypes');
 const { CharacterTypes, validEndingTypes } = require('../CharacterTypes');
-const OperatorFunctionMap = require('../OperatorFunctionMap');
+const { OperatorFunctionMap, UnaryOperatorFunctionMap } = require('../OperatorFunctionMap');
 const FunctionNameInformationMap = require('../FunctionNameInformationMap');
 const { GroupingSymbolMap, RightToLeftGroupingSymbols } = require('../GroupingSymbols');
 
@@ -118,6 +118,17 @@ class UnsortedExpression {
         if (maxNumOfInputs === 'multi') return;
         if (numOfInputs > maxNumOfInputs)
         return new InvalidExpression(`There are too many arguments in the ${lastUnresolvedFunction.functionName} function. There can't be more than ${maxNumOfInputs} argument(s).`, lastUnresolvedFunction.strIndex + 1);
+    }
+
+    insertUnaryOperator() {
+        this.initializeOperationArrayAtNestingLvl();
+
+        const operation = new Operation(
+            UnaryOperatorFunctionMap.get(this.character),
+            this.numbersLen - 1, 1
+        )
+
+        this.operations[this.totalNestingLvl].insertIntoUnary(operation);
     }
     
     openExpressionGroup() {

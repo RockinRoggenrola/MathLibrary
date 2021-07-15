@@ -4,10 +4,11 @@ class OperationArray {
         this.multDiv = [];
         this.exponents = [];
         this.functions = [];
+        this.unaryOperations = [];
     }
 
     merge() {
-        return this.functions.concat(this.exponents, this.multDiv, this.addSub);
+        return this.functions.concat(this.unaryOperations, this.exponents, this.multDiv, this.addSub);
     }
 
     insertIntoAddSub(operation) {
@@ -24,6 +25,10 @@ class OperationArray {
 
     insertIntoFunctions(operation) {
         this.functions.push(operation);
+    }
+
+    insertIntoUnary(operation) {
+        this.unaryOperations.push(operation);
     }
 }
 

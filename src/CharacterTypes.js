@@ -1,23 +1,27 @@
 const FunctionNameInformationMap = require("./FunctionNameInformationMap");
-const { GroupingSymbolMap  } = require("./GroupingSymbols");
 const NumberSymbolMap = require("./NumberSymbolMap");
-const OperatorFunctionMap = require("./OperatorFunctionMap");
 const CharacterTypes = new Map();
+const { GroupingSymbolMap } = require("./GroupingSymbols");
+const { OperatorFunctionMap, UnaryOperatorFunctionMap } = require("./OperatorFunctionMap");
 
 OperatorFunctionMap.forEach((value, key) => CharacterTypes.set(key, 'operator'));
+
+UnaryOperatorFunctionMap.forEach((value, key) => CharacterTypes.set(key, 'unary'));
+
 FunctionNameInformationMap.forEach((value, key) => CharacterTypes.set(key, 'function'));
+
 NumberSymbolMap.forEach((value, key) => {
     if (typeof(value) === 'number') CharacterTypes.set(key, 'number');
     if (typeof(value) === 'object') CharacterTypes.set(key, 'constant');
 })
-GroupingSymbolMap.forEach((value, key) => {
+
+GroupingSymbolMap.forEach(value => {
     CharacterTypes.set(value.left, 'left');
     CharacterTypes.set(value.right, 'right');
 })
 
 CharacterTypes.set('.', 'decimal');
 CharacterTypes.set(',', 'comma');
-
 
 let longestCharLen = 0;
 for (key of CharacterTypes.keys()) {
@@ -35,6 +39,6 @@ const findCharFromArrayAndIndex = (exprArray, index) => {
     }
 }
 
-const validEndingTypes = new Set(['number', 'constant', 'right']);
+const validEndingTypes = new Set(['number', 'constant', 'unary', 'right']);
 
 module.exports = { CharacterTypes, longestCharLen, validEndingTypes, findCharFromArrayAndIndex };
