@@ -5,7 +5,7 @@ let math = {
     FunctionNameInformationMap: require('./src/FunctionNameInformationMap')
 };
 
-const expression = '';
+const expression = 'sin{3.4}';
 console.log(expression);
 console.log(math.compute(expression));
 

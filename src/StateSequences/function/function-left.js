@@ -1,11 +1,12 @@
 const StateSequence = require("../../Classes/StateSequenceClass");
 const FunctionNameInformationMap = require("../../FunctionNameInformationMap");
 const { GroupingSymbolMap } = require("../../GroupingSymbols");
+const InvalidExpression = require("../../Classes/InvalidExpressionClass");
 
 const onFunction = function() {
-    const groupingSymFunc = GroupingSymbolMap.get(this.character).function;
-    if (FunctionNameInformationMap.get(this.lastCharacter).maxNumOfInputs !== 1 && groupingSymFunc !== (array => array[0]))
-    console.log(true);
+    const validCharsForMultiVarFuncs = new Set(['(', '[']);
+    if (FunctionNameInformationMap.get(this.lastCharacter).maxNumOfInputs !== 1 && !validCharsForMultiVarFuncs.has(this.character))
+    return new InvalidExpression(`Must have a parenthesis or square bracket after the ${this.lastCharacter} function.`, this.srtIndex);
 
     this.operations[this.totalNestingLvl].functions.pop();
     this.openExpressionGroup();
