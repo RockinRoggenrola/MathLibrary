@@ -1,5 +1,8 @@
+const InvalidExpression = require("../Classes/InvalidExpressionClass");
+const { CharacterTypes } = require("../CharacterTypes");
+const UnsortedExpression = require("../Classes/UnsortedExpressionClass");
 class Expression {
-    constructor(numbers, operations) {
+    constructor({ numbers, operations }) {
         this.numbers = numbers;
         this.operations = operations;
     }
@@ -23,6 +26,34 @@ class Expression {
         }
 
         return placeHolderExpr.evaluate();
+    }
+
+    static parse(exprString) {
+        let currentState = 'beginning';
+        let currentExpr = new UnsortedExpression(exprString);
+        const { exprArray } = currentExpr; 
+    
+        while (currentExpr.strIndex < exprArray.length) {
+    
+            currentExpr.update();
+            const { character, strIndex } = currentExpr;
+            const nextState = CharacterTypes.get(character);
+    
+            if (!nextState) return new InvalidExpression(`Invalid character: ${character}.`, strIndex + 1);
+            if (currentExpr.checkForInvalidCommas() && character === ',') return currentExpr.checkForInvalidCommas();
+    
+            const executionValue = currentExpr[currentState + nextState]();
+            if (executionValue) return executionValue;
+    
+            if (currentExpr.isIndexAtEndOfExpr && nextState === 'number') currentExpr.makeLastNumComplex();
+            currentState = nextState;
+            currentExpr.strIndex += currentExpr.charLen;
+            
+        }
+        
+        if (currentExpr.totalNestingLvl !== 0) 
+        return new InvalidExpression('Must have the same number of opening group smybols as closing group symbols in your expression.');
+        return new Expression(currentExpr.completeParse());
     }
 }
 

@@ -4,7 +4,6 @@ const ComplexNumber = require('../../ComplexNumberClass');
 const NumberSymbolMap = require('../NumberSymbolMap');
 const Operation = require('./OperationClass');
 const OperationArray = require('./OperationArrayClass');
-const Expression = require('./ExpressionClass');
 const InvalidExpression = require('./InvalidExpressionClass');
 const { findCharFromArrayAndIndex } = require('../CharacterTypes');
 const { CharacterTypes, validEndingTypes } = require('../CharacterTypes');
@@ -182,7 +181,7 @@ class UnsortedExpression {
     
         const operations = this.operations.reduce((total, value) => value.merge().concat(total), []);
         const numbers = this.numbers;
-        return new Expression(numbers, operations);
+        return { numbers, operations };
     }
 
 }

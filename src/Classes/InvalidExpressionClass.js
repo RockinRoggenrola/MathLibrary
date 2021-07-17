@@ -5,7 +5,7 @@ class InvalidExpression {
         this.baseMessage = 'Invalid Expression.';
     }
     
-    get fullMessage() {
+    toString() {
         if (!this.index) return `${this.baseMessage} ${this.error}`;
 
         return `${this.baseMessage} ${this.error} At character ${this.index}.`;
