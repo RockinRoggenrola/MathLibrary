@@ -36,6 +36,7 @@ class ComplexNumber {
     }
 
     equals(that) {
+        if (typeof(that) === 'string') return this.toString() === that;
         return (this.real === that.real && this.imaginary === that.imaginary);
     }
 
