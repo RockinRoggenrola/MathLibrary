@@ -90,8 +90,8 @@ class ComplexNumber {
     
     static exponentiate(arrayOfNums) {
         return arrayOfNums.reduce((num1, num2) => {
-            if (num2.magnitude === 0) return new ComplexNumber(1, 0);
-            if (num1.magnitude === 0) return new ComplexNumber(0, 0);
+            if (num2.equals('0')) return new ComplexNumber(1, 0);
+            if (num1.equals('0')) return new ComplexNumber(0, 0);
 
             const magnitude = Math.pow(num1.magnitude, num2.real) * Math.exp(-1 * num2.imaginary * num1.angle);
             const angle = num2.real * num1.angle + num2.imaginary * Math.log(num1.magnitude);
