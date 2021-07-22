@@ -6,7 +6,7 @@ const math = {
     FunctionNameInformationMap: require('./src/FunctionNameInformationMap')
 };
 
-const polynomial = new math.Polynomial([1,0,0,1]);
+const polynomial = new math.Polynomial([1,'-sqrt(2)',1]);
 console.log(polynomial.factoredExpressionString());
 
 module.exports = math;
