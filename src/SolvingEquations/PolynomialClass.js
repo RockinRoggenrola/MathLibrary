@@ -1,7 +1,27 @@
 const compute = require("../Compute/ComputeFunction");
 
 class Polynomial {
-	constructor(coefficients) {
+	constructor(coefficients, optionalExponent) {
+        if (optionalExponent !== undefined) {
+            let coefficientArray = [];
+            for (let i = 0; i < optionalExponent; i++) {
+                coefficientArray.push(0);
+            }
+            coefficientArray.unshift(coefficients.toString());
+            this.coefficients = new Polynomial(coefficientArray).coefficients;
+            return;
+        }
+
+        if (coefficients[0] === undefined) {
+            this.coefficients = [compute('0')];
+            return;
+        }
+
+        if (compute(`${coefficients[0]}`).equals(compute('0'))) {
+            this.coefficients = new Polynomial(coefficients.slice(1)).coefficients;
+            return;
+        }
+
 		this.coefficients = coefficients.reverse().map(value => compute(String(value)));
 	}
 
@@ -9,37 +29,46 @@ class Polynomial {
 		return this.coefficients.length - 1;
 	}
 
+    evaluate(x) {
+        return this.coefficients.reduce((total, coefficient, index) => compute(`${total}+(${coefficient})(${x})^${index}`), '0');
+    }
+
 	equals(that) {
 		return this.coefficients.reduce((total, value, index) => {
 			return total && value.equals(that.coefficients[index]) && this.degree === that.degree;
 		}, true)
 	}
 
+    isMonomial() {
+        return this.equals(new Polynomial(this.coefficients[this.degree], this.degree));
+    }
+
 	toString() {
-		const string = this.coefficients.reduce((total, value, index) => {
-			const realPartIsNegative = value.real < 0;
-			const coefficient =
-				value.real !== 0 && value.imaginary !== 0 ?
-				realPartIsNegative ?
-				`-(${compute(`-(${value.toString()})`).toString()})` :
-				`(${value.toString()})` :
-				value.equals('1') || value.equals('-1') ?
-				value.equals('1') ?
-				`` :
-				`-` :
-				value.toString();
+        if (this.degree === 0 && this.coefficients[0].equals(compute('0'))) return '0';
 
-			if (value.equals('0')) return total;
-			if (index === 0 && !realPartIsNegative) return `+${value.toString()}`;
-			if (index === 0) return value.toString();
-			if (index === 1 && !realPartIsNegative) return `+${coefficient}x${total}`;
-			if (index === 1) return `${coefficient}x${total}`;
-			if (!realPartIsNegative) return `+${coefficient}x^${index}${total}`;
-			else return `${coefficient}x^${index}${total}`;
-		}, '')
+        const baseString = this.coefficients.reduce((total, value, index) => {
+            if (index === 0 || value.equals(compute('0'))) var variable = '';
+            else if (index === 1) var variable = 'x';
+            else var variable = `x^${index}`;
 
-		return string[0] === '+' ? string.slice(1) : string;
-	}
+            const coefficientStartsWithMinus = value.toString()[0] === '-';
+            const realAndImaginaryAreNonZero = value.real !== 0 && value.imaginary !== 0;
+
+            if (value.equals(compute('0'))) var coefficient = '';
+            else if (index === 0) var coefficient = coefficientStartsWithMinus ? value : `+${value.toString()}`
+            else if (value.equals(compute('1'))) var coefficient = '';
+            else if (value.equals(compute('-1'))) var coefficient = '-';
+
+            else if (coefficientStartsWithMinus && realAndImaginaryAreNonZero) var coefficient = `-(${compute(`-(${value.toString()})`)})`;
+            else if (!coefficientStartsWithMinus && !realAndImaginaryAreNonZero) var coefficient = `+${value.toString()}`;
+            else if (coefficientStartsWithMinus && !realAndImaginaryAreNonZero) var coefficient = value.toString();
+            else if (!coefficientStartsWithMinus && realAndImgainaryAreNonZero) var coefficient = `+(${value.toString()})`
+
+            return coefficient + variable + total;
+        }, '')
+
+        return baseString[0] === '+' ? baseString.slice(1) : baseString;
+    }
 
 	solve() {
 		const [a, b, c, d, e] = this.coefficients.reverse().map(value => `(${value.toString()})`);
@@ -52,36 +81,38 @@ class Polynomial {
 		];
 
 		if (this.degree === 3) {
-			const p = `(${compute(`-${b}/(3${a})`).fixPrecision()})`;
-			const q = `(${compute(`${p}^3+(${b}${c}-3${a}${d})/(6${a}^2)`).fixPrecision()})`;
-			const r = `(${compute(`${c}/(3${a})`).fixPrecision()})`;
-			const s = compute(`${q}^2+(${r}-${p}^2)^3`).fixPrecision();
+            const p = `(${compute(`(${c}-(${b}^2)/(3${a}))/${a}`).fixPrecision()})`;
+            const q = `(${compute(`(${d}+(2${b}^3)/(27${a}^2)-(${b}${c})/(3${a}))/${a}`).fixPrecision()})`
+            const discriminant = `${compute(`${q}^2/4+${p}^3/27`).fixPrecision()}`;
 
-			return [
-				compute(`exp(0ipi/3)(${q}+sqrt(${s}))^(1/3)+exp(0ipi/3)(${q}-sqrt(${s}))^(1/3)+${p}`).fixPrecision(),
-				compute(`exp(2ipi/3)(${q}+sqrt(${s}))^(1/3)+exp(2ipi/3)(${q}-sqrt(${s}))^(1/3)+${p}`).fixPrecision(),
-				compute(`exp(4ipi/3)(${q}+sqrt(${s}))^(1/3)+exp(4ipi/3)(${q}-sqrt(${s}))^(1/3)+${p}`).fixPrecision()
-			];
-		}
+            const root1 = [
+                compute(`exp(0ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(0ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(0ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(2ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(0ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(4ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(2ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(0ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(2ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(2ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(2ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(4ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(4ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(0ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(4ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(2ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision(),
+                compute(`exp(4ipi/3)cbrt(-${q}/2-sqrt(${discriminant}))+exp(4ipi/3)cbrt(-${q}/2+sqrt(${discriminant}))-${b}/(3${a})`).fixPrecision()
+            ].find(value => this.evaluate(value).equals(compute('0')));
+
+            const resultingQuadratic = Polynomial.divide([this, new Polynomial([1, compute(`-(${root1})`)])]);
+            return [root1, ...resultingQuadratic.solve()];
+        }
 
 		if (this.degree === 4) {
-			const discriminant = `(${compute(`256${a}^3${e}^3-192${a}^2${b}${d}${e}^2-128${a}^2${c}^2${e}^2+144${a}^2${c}${d}^2${e}-27${a}^2${d}^4+144${a}${b}^2${c}${e}^2-6${a}${b}^2${d}^2${e}-80${a}${b}${c}^2${d}${e}+18${a}${b}${c}${d}^3+16${a}${c}^4${e}-4${a}${c}^3${d}^2-27${b}^4${e}^2+18${b}^3${c}${d}${e}-4${b}^3${d}^3-4${b}^2${c}^3${e}+${b}^2${c}^2${d}^2`)})`;
+            const p = `(${compute(`(${c}-(3${b}^2)/(8${a}))/${a}`)})`;
+            const q = `(${compute(`(${b}^3/(8${a}^2)-(${b}${c})/(2${a})+${d})/${a}`)})`;
+            const r = `(${compute(`(${b}^4/(256${a}^3)-${b}^3/(64${a}^3)+(${b}^2${c})/(16${a}^2)+(${b}${d})/(4${a})+${e})/${a}`)})`;
+            const z = `(${new Polynomial([8, `20${p}`, `16${p}^2-8${r}`, `4${p}^3-4${p}${r}-${q}^2`]).solve()[0]})`;
+            const alpha = `(${compute(`sqrt(2${z}+${p})`)})`;
 
-			const p = `(${compute(`(8${a}${c}-3${b}^2)/(8${a}^2)`).fixPrecision()})`;
-			const q = `(${compute(`(${b}^3-4${a}${b}${c}+8${a}^2${d})/(8${a}^3)`).fixPrecision()})`;
-			const r = `(${compute(`${c}^2-3${b}${d}+12${a}${e}`).fixPrecision()})`;
-			const s = `(${compute(`2${c}^3-9${b}${c}${d}+27${b}^2${e}+27${a}${d}^2-72${a}${c}${e}`).fixPrecision()})`;
-			const t = `(${compute(`cbrt((${s}+sqrt(-27${discriminant}))/2)`).fixPrecision()})`;
-			const u = `(${compute(`1/2sqrt(-2/3${p}+1/(3${a})(${t}+${r}/${t}))`).fixPrecision()})`; 
-
-			console.log(discriminant, p, q, u, r, s, t, u);
-			return [
-				compute(`-${b}/(4${a})+${u}+1/2sqrt(-4${u}^2-2${p}-${q}/${u})`).fixPrecision(),
-				compute(`-${b}/(4${a})+${u}-1/2sqrt(-4${u}^2-2${p}-${q}/${u})`).fixPrecision(),
-				compute(`-${b}/(4${a})-${u}+1/2sqrt(-4${u}^2-2${p}-${q}/${u})`).fixPrecision(),
-				compute(`-${b}/(4${a})-${u}-1/2sqrt(-4${u}^2-2${p}-${q}/${u})`).fixPrecision()
-			];
-		}
+            return [
+               compute(`-${b}/(4${a})+(${alpha}+sqrt(-2${z}-3${p}+(2${q})/${alpha}))/2`), 
+               compute(`-${b}/(4${a})+(${alpha}-sqrt(-2${z}-3${p}+(2${q})/${alpha}))/2`) 
+            ];
+        } 
 	}
 
 	factor() {
@@ -94,14 +125,75 @@ class Polynomial {
 			return `${total}(${value.toString()})`;
 		}, '')
 
-		if (this.coefficients[0].equals('1')) return factors;
-		if (this.coefficients[0].equals('-1')) return '-' + factors;
+		if (this.coefficients[0].equals(compute('1'))) return factors;
+		if (this.coefficients[0].equals(compute('-1'))) return '-' + factors;
 		return this.coefficients[0].toString() + factors;
 	}
+    
+    static add(arrayOfPolynomials) {
+        return arrayOfPolynomials.reduce((polynomial1, polynomial2) => {
+            const biggerPolynomial = polynomial1.degree >= polynomial2.degree ? polynomial1 : polynomial2; 
+            const smallerPolynomial = polynomial1.degree >= polynomial2.degree ? polynomial2 : polynomial1; 
 
-	static add(polynomial1, polynomial2) {
+            return new Polynomial(biggerPolynomial.coefficients.reduce((total, value, index) => {
+                if (!smallerPolynomial.coefficients[index]) return [...total, value];
+                return [...total, compute(`${value}+(${smallerPolynomial.coefficients[index]})`)];
+            }, []).reverse());
+        }, new Polynomial([]));
+    }
 
-	}
+    static subtract(arrayOfPolynomials) {
+        return arrayOfPolynomials.reduce((polynomial1, polynomial2) => {
+            const biggerPolynomial = polynomial1.degree >= polynomial2.degree ? polynomial1 : polynomial2; 
+            const smallerPolynomial = polynomial1.degree >= polynomial2.degree ? polynomial2 : polynomial1; 
+
+            return new Polynomial(biggerPolynomial.coefficients.reduce((total, value, index) => {
+                if (!smallerPolynomial.coefficients[index]) return [...total, value];
+                return [...total, compute(`${value}-(${smallerPolynomial.coefficients[index]})`)];
+            }, []).reverse());
+        }, new Polynomial([]));
+    }
+
+    static multiply(arrayOfPolynomials) {
+        return arrayOfPolynomials.reduce((polynomial1, polynomial2) => {
+            const polynomial1Len = polynomial1.coefficients.length;
+            const polynomial2Len = polynomial2.coefficients.length;
+            let product = new Polynomial([]);
+
+            for (let exponent1 = 0; exponent1 < polynomial1Len; exponent1++) {
+                const coefficient1 = polynomial1.coefficients[exponent1];
+                for (let exponent2 = 0; exponent2 < polynomial2Len; exponent2++) {
+                    const coefficient2 = polynomial2.coefficients[exponent2];
+                    product = Polynomial.add([product, new Polynomial(compute(`(${coefficient1})(${coefficient2})`), exponent1 + exponent2)]);        
+                }
+            }
+
+            return product;
+        }, new Polynomial([1]))
+    }
+
+    static divide(arrayOfPolynomials) {
+        return arrayOfPolynomials.reduce((polynomial1, divisor) => {
+            let quotient = new Polynomial([]);
+            let dividend = polynomial1;
+
+            for (let i = 0; dividend.degree - divisor.degree >= 0; i++) {
+                const nextPartOfQuotient = new Polynomial(compute(`(${dividend.coefficients[dividend.degree]})/(${divisor.coefficients[divisor.degree]})`), dividend.degree - divisor.degree);
+                quotient = Polynomial.add([quotient, nextPartOfQuotient]);
+                dividend = Polynomial.subtract([dividend, Polynomial.multiply([nextPartOfQuotient, divisor])])
+            }
+
+            return quotient;
+        })
+    }
+
+    exponentiate(number) {
+        const factors = [];
+        for (let i = 0; i < number; i++) {
+            factors.push(this);
+        }
+        return Polynomial.multiply(factors);
+    }
 }
 
 
