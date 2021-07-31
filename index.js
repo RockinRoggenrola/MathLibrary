@@ -7,9 +7,9 @@ const math = {
     FunctionNameInformationMap: require('./src/FunctionNameInformationMap')
 };
 
-const polynomial1 = new math.Polynomial([1, 5]);
-const polynomial2 = new math.Polynomial([1, 4]);
-const polynomial3 = new math.Polynomial([1, -5]);
+const polynomial1 = new math.Polynomial([1, "pi"]);
+const polynomial2 = new math.Polynomial([1, "e"]);
+const polynomial3 = new math.Polynomial([1, "i"]);
 
 console.log(`(${polynomial1.toString()})(${polynomial2.toString()})(${polynomial3.toString()}) = ${math.Polynomial.multiply([polynomial1, polynomial2, polynomial3]).factoredExpressionString()}`);
 

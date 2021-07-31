@@ -134,10 +134,10 @@ class ComplexNumber {
             }
         }
         if (this.isPurelyImaginary()) {
-            const exponentiate = number => number.exponentiate(int);
+            const exponentiate = number => number.exponentiateByInt(int);
             const i = new ComplexNumber(0, 1);
             
-            return ComplexNumber.multiply([exponentiate(int), exponentiate(i)]);
+            return ComplexNumber.multiply([exponentiate(new ComplexNumber(this.imaginary, 0)), exponentiate(i)]);
         }
         return ComplexNumber.exponentiate([this, new ComplexNumber(int, 0)]);
     }
