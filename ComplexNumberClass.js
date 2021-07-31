@@ -5,18 +5,15 @@ class ComplexNumber {
     }
 
     toString() {
-        // the real part is 0
         if (this.imaginary === 0 && this.real === 0) return '0';
         if (this.real === 0 && this.imaginary === 1) return 'i';
         if (this.real === 0 && this.imaginary == -1) return '-i';
         if (this.real === 0) return `${this.imaginary}i`;
 
-        //special num2s for the imaginary part
         if (this.imaginary === 1) return `${this.real}+i`;
         if (this.imaginary === -1) return `${this.real}-i`;
         if (this.imaginary === 0) return `${this.real}`;
         
-        //the regular/default case
         if (this.imaginary > 0) return `${this.real}+${this.imaginary}i`;
         if (this.imaginary < 0) return `${this.real}${this.imaginary}i`; 
     }
@@ -57,6 +54,22 @@ class ComplexNumber {
         if (this.imaginary === 0) return 0;
         if (this.imaginary > 0) return Math.PI / 2;
         return Math.PI / -2;
+    }
+
+    isReal() {
+        return this.imaginary === 0;
+    }
+
+    isPurelyImaginary() {
+        return this.real === 0;
+    }
+
+    isInteger() {
+        return this.isReal() && this.real === Math.trunc(this.real);
+    }
+
+    isNatural() {
+        return this.isInteger() && this.real > 0;
     }
 
     static add(arrayOfNums) {
@@ -104,6 +117,29 @@ class ComplexNumber {
 
             return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
         })
+    }
+
+    exponentiateByInt(int) {
+        if (this.isReal()) return new ComplexNumber(this.real ** int, 0);
+        if (this.toString() === 'i') {
+            switch (int % 4) {
+                case 0:
+                    return new ComplexNumber(1, 0);
+                case 1:
+                    return new ComplexNumber(0, 1);
+                case 2:
+                    return new ComplexNumber(-1, 0);
+                case 3:
+                    return new ComplexNumber(0, -1);
+            }
+        }
+        if (this.isPurelyImaginary()) {
+            const exponentiate = number => number.exponentiate(int);
+            const i = new ComplexNumber(0, 1);
+            
+            return ComplexNumber.multiply([exponentiate(int), exponentiate(i)]);
+        }
+        return ComplexNumber.exponentiate([this, new ComplexNumber(int, 0)]);
     }
 
     static average(arrayOfNums) {

@@ -30,7 +30,7 @@ class Polynomial {
 	}
 
     evaluate(x) {
-        return this.coefficients.reduce((total, coefficient, index) => compute(`${total}+(${coefficient})(${x})^${index}`), '0');
+        return this.coefficients.reduce((total, coefficient, index) => compute(`${total}+(${coefficient})(${x.exponentiateByInt(index)})`), '0');
     }
 
 	equals(that) {
@@ -62,7 +62,7 @@ class Polynomial {
             else if (coefficientStartsWithMinus && realAndImaginaryAreNonZero) var coefficient = `-(${compute(`-(${value.toString()})`)})`;
             else if (!coefficientStartsWithMinus && !realAndImaginaryAreNonZero) var coefficient = `+${value.toString()}`;
             else if (coefficientStartsWithMinus && !realAndImaginaryAreNonZero) var coefficient = value.toString();
-            else if (!coefficientStartsWithMinus && realAndImgainaryAreNonZero) var coefficient = `+(${value.toString()})`
+            else if (!coefficientStartsWithMinus && realAndImaginaryAreNonZero) var coefficient = `+(${value.toString()})`
 
             return coefficient + variable + total;
         }, '')
@@ -72,8 +72,9 @@ class Polynomial {
 
 	solve() {
 		const [a, b, c, d, e] = this.coefficients.reverse().map(value => `(${value.toString()})`);
+        this.coefficients.reverse();
 
-		if (this.degree === 1) return [compute(`-(${b})/(${a})`).fixPrecision()];
+		if (this.degree === 1) return [compute(`-${b}/${a}`).fixPrecision()];
 
 		if (this.degree === 2) return [
 			compute(`(-${b}+sqrt(${b}^2-4${a}${c}))/(2${a})`).fixPrecision(),
@@ -82,7 +83,7 @@ class Polynomial {
 
 		if (this.degree === 3) {
             const p = `(${compute(`(${c}-(${b}^2)/(3${a}))/${a}`).fixPrecision()})`;
-            const q = `(${compute(`(${d}+(2${b}^3)/(27${a}^2)-(${b}${c})/(3${a}))/${a}`).fixPrecision()})`
+            const q = `(${compute(`(${d}+(2${b}^3)/(27${a}^2)-(${b}${c})/(3${a}))/${a}`).fixPrecision()})`;
             const discriminant = `${compute(`${q}^2/4+${p}^3/27`).fixPrecision()}`;
 
             const root1 = [
@@ -125,9 +126,9 @@ class Polynomial {
 			return `${total}(${value.toString()})`;
 		}, '')
 
-		if (this.coefficients[0].equals(compute('1'))) return factors;
-		if (this.coefficients[0].equals(compute('-1'))) return '-' + factors;
-		return this.coefficients[0].toString() + factors;
+		if (this.coefficients[this.degree].equals(compute('1'))) return factors;
+		if (this.coefficients[this.degree].equals(compute('-1'))) return '-' + factors;
+		return this.coefficients[this.degree].toString() + factors;
 	}
     
     static add(arrayOfPolynomials) {
