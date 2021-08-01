@@ -56,7 +56,7 @@ class Polynomial {
 
             if (value.equals(compute('0'))) var coefficient = '';
             else if (index === 0) var coefficient = coefficientStartsWithMinus ? value : `+${value.toString()}`
-            else if (value.equals(compute('1'))) var coefficient = '';
+            else if (value.equals(compute('1'))) var coefficient = '+';
             else if (value.equals(compute('-1'))) var coefficient = '-';
 
             else if (coefficientStartsWithMinus && realAndImaginaryAreNonZero) var coefficient = `-(${compute(`-(${value.toString()})`)})`;
@@ -103,17 +103,25 @@ class Polynomial {
         }
 
 		if (this.degree === 4) {
-            const p = `(${compute(`(${c}-(3${b}^2)/(8${a}))/${a}`)})`;
-            const q = `(${compute(`(${b}^3/(8${a}^2)-(${b}${c})/(2${a})+${d})/${a}`)})`;
-            const r = `(${compute(`(${b}^4/(256${a}^3)-${b}^3/(64${a}^3)+(${b}^2${c})/(16${a}^2)+(${b}${d})/(4${a})+${e})/${a}`)})`;
+            const p = `(${compute(`(${c}-(3${b}^2)/(8${a}))/${a}`).fixPrecision()})`;
+            const q = `(${compute(`(${b}^3/(8${a}^2)-(${b}${c})/(2${a})+${d})/${a}`).fixPrecision()})`;
+            const r = `(${compute(`((-3${b}^4)/(256${a}^3)+(${b}^2${c})/(16${a}^2)-(${b}${d})/(4${a})+${e})/${a}`).fixPrecision()})`;
             const z = `(${new Polynomial([8, `20${p}`, `16${p}^2-8${r}`, `4${p}^3-4${p}${r}-${q}^2`]).solve()[0]})`;
-            const alpha = `(${compute(`sqrt(2${z}+${p})`)})`;
+
+            if (compute(`2${z}+${p}`).equals(compute('0'))) return [
+                compute(`-${b}/(4${a})+sqrt(-${p}-${z}+sqrt(${p}^2-${r}+2${p}${z}+${z}^2))`).fixPrecision(),
+                compute(`-${b}/(4${a})+sqrt(-${p}-${z}-sqrt(${p}^2-${r}+2${p}${z}+${z}^2))`).fixPrecision(),
+                compute(`-${b}/(4${a})-sqrt(-${p}-${z}+sqrt(${p}^2-${r}+2${p}${z}+${z}^2))`).fixPrecision(),
+                compute(`-${b}/(4${a})-sqrt(-${p}-${z}-sqrt(${p}^2-${r}+2${p}${z}+${z}^2))`).fixPrecision()
+            ];
+
+            const alpha = `(${compute(`sqrt(2${z}+${p})`).fixPrecision()})`;
 
             return [
-               compute(`-${b}/(4${a})+(${alpha}+sqrt(-2${z}-3${p}+(2${q})/${alpha}))/2`), 
-               compute(`-${b}/(4${a})+(${alpha}-sqrt(-2${z}-3${p}+(2${q})/${alpha}))/2`) 
-            ];
-        } 
+                ...new Polynomial([1, `-${alpha}`, `${p}+${z}+${q}/(2${alpha})`]).solve(),
+                ...new Polynomial([1, `${alpha}`, `${p}+${z}-${q}/(2${alpha})`]).solve()
+            ].map(value => compute(`-${b}/(4${a})+(${value})`));
+        }
 	}
 
 	factor() {
