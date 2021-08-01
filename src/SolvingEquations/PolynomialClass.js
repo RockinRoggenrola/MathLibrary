@@ -33,6 +33,25 @@ class Polynomial {
         return this.coefficients.reduce((total, coefficient, index) => compute(`${total}+(${coefficient})(${x.exponentiateByInt(index)})`), '0');
     }
 
+    differentiate(numberOfTimes) {
+        if (numberOfTimes === undefined) var numOfTimes = 1;
+        else var numOfTimes = numberOfTimes;
+        let derivative = this;
+
+        for (let i = 0; i < numOfTimes; i++) {
+            const newCoefficients = derivative.coefficients.map((value, index) => compute(`${index}(${value})`));
+            newCoefficients.reverse();
+            newCoefficients.pop();
+            derivative = new Polynomial(newCoefficients);
+        }
+
+        return derivative;
+    }
+
+    criticalPoints() {
+        return this.differentiate().solve();
+    }
+
 	equals(that) {
 		return this.coefficients.reduce((total, value, index) => {
 			return total && value.equals(that.coefficients[index]) && this.degree === that.degree;
